@@ -129,10 +129,6 @@ Java suporta dois padrões principais de comentários:
 */
 ```
 
-As **Strings** em Java são um dos tópicos mais importantes e, acredite, um dos que mais escondem "pegadinhas" para quem está começando. Elas não são apenas um tipo de dado simples, mas sim **objetos** completos.
-
-Aqui está o resumo expandido para o seu GitHub:
-
 ---
 
 ## 🧵 Capítulo 5: Strings (Cadeias de Caracteres)
@@ -184,7 +180,7 @@ System.out.println(s1.equals(s2)); // ✅ true (o conteúdo é o mesmo)
 
 ---
 
-## 🧩 Capítulo 6: Booleanos e Operadores Lógicos (Cadeias de Caracteres)
+## 🧩 Capítulo 6: Booleanos e Operadores Lógicos
 
 O tipo de dado `boolean` é a unidade fundamental de lógica no Java. Ele permite que o programa tome decisões e siga caminhos diferentes no código com base em condições verdadeiras ou falsas.
 
@@ -499,12 +495,6 @@ import java.math.BigInteger;
 BigInteger umTrilhao = new BigInteger("1000000000000");
 BigInteger resultado = umTrilhao.multiply(umTrilhao); // O céu é o limite
 ```
-
----
-
-Refazer o **Capítulo 8** com foco total no fluxo de decisão é uma excelente ideia, pois é aqui que o código deixa de ser uma lista de instruções e passa a ter "inteligência".
-
-Aqui está a versão aprofundada do Capítulo 8, utilizando o exemplo do carro e expandindo para conceitos de boas práticas e lógica avançada.
 
 ---
 
