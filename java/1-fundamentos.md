@@ -2,6 +2,20 @@
 
 Este documento apresenta um resumo dos conceitos básicos da linguagem Java, estruturado para facilitar a consulta e o aprendizado.
 
+## 📌 Sumário
+
+- [Capítulo 1: Tipagem e Variáveis](#-capítulo-1-tipagem-e-variáveis)
+- [Capítulo 2: Programação Orientada a Objetos (Classes)](#️-capítulo-2-programação-orientada-a-objetos-classes)
+- [Capítulo 3: Métodos e Comportamentos](#️-capítulo-3-métodos-e-comportamentos)
+- [Capítulo 4: Escopo e Comentários](#-capítulo-4-escopo-e-comentários)
+- [Capítulo 5: Strings (Cadeias de Caracteres)](#-capítulo-5-strings-cadeias-de-caracteres)
+- [Capítulo 6: Booleanos e Operadores Lógicos](#-capítulo-6-booleanos-e-operadores-lógicos)
+- [Capítulo 7: Numbers (Números)](#-capítulo-7-numbers-números)
+- [Capítulo 8: Estruturas Condicionais (If-Else)](#-capítulo-8-estruturas-condicionais-if-else)
+- [Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
+
+---
+
 ## 📖 Capítulo 1: Tipagem e Variáveis
 
 O Java é uma linguagem de **tipagem estática**, o que significa que o tipo de uma variável deve ser conhecido no momento da compilação. Diferente de linguagens de tipagem dinâmica, aqui a definição exige a especificação explícita do tipo.
@@ -65,7 +79,8 @@ count = 2;     // Atualização para um novo valor
 
 ## 🏗️ Capítulo 2: Programação Orientada a Objetos (Classes)
 
-Java é uma linguagem estritamente **orientada a objetos**. Isso implica que todas as funções e comportamentos devem obrigatoriamente residir dentro de uma `class`.
+-- TODO -> referenciar novo arquivo classes.md para uma análise mais aprofundada
+Java é uma linguagem estritamente **orientada a objetos (POO)**. Isso significa que, no Java, não existem funções "soltas"; tudo deve obrigatoriamente residir dentro de uma `class`.
 
 A palavra-chave `class` é utilizada para essa definição:
 
@@ -74,6 +89,55 @@ class Calculator {
     // Comportamentos e dados ficam aqui
 }
 ```
+
+### 1. O Conceito de Molde (Blueprint)
+
+Imagine a classe como uma planta de arquitetura. A planta não é a casa, mas ela define quantos quartos a casa terá e como as portas abrem. No Java:
+
+- **Classe:** É o projeto/molde (ex: `Carro`).
+- **Objeto:** É a casa construída, ou a **instância** (ex: "O meu Nivus Vermelho").
+
+### 2. Anatomia de uma Classe
+
+Uma classe é composta por dois pilares principais:
+
+1.  **Atributos (Campos):** Representam o **estado** ou as características (o que ela _tem_).
+2.  **Métodos:** Representam o **comportamento** (o que ela _faz_. Esse conceito vai ser abordado no [Capítulo 3](#️-capítulo-3-métodos-e-comportamentos)).
+
+```java
+class Car {
+    // Atributos (Estado)
+    String model;
+    String color;
+    int fuelLevel;
+
+    // Método (Comportamento)
+    void accelerate() {
+        System.out.println("O carro está acelerando...");
+    }
+}
+```
+
+### 3. Instanciação: Criando Objetos
+
+Para transformar o "molde" em um objeto real na memória do computador, utilizamos a palavra-chave `new`. Esse processo é chamado de **instanciação**.
+
+```java
+// Criando uma instância (objeto) da classe Car
+Car myCar = new Car();
+
+// Acessando atributos e métodos
+myCar.model = "Gol";
+myCar.color = "Red";
+myCar.accelerate();
+```
+
+### 4. Convenções de Nomeclatura
+
+Para manter o código limpo e padronizado (Clean Code), o Java segue a convenção **PascalCase** para nomes de classes:
+
+- ✅ Correto: `GerenciadorDeContas`, `Car`, `User`
+- ❌ Incorreto: `gerenciador_de_contas`, `carro`, `USUARIO`
 
 ---
 
@@ -202,6 +266,8 @@ boolean temSol = false;
 
 Se você vem do JavaScript, Python ou PHP, está acostumado com valores como `0`, `""` (string vazia), `null` ou `undefined` sendo tratados como `false` dentro de um `if`.
 
+-- TODO -> REFERENCIAR NULLABILITY (arquivo nullability.md)
+
 **No Java, isso não existe.**
 
 Em Java, o controle de fluxo (`if`, `while`, etc.) exige **estritamente** um valor do tipo `boolean`. O compilador não faz "coerção" (conversão automática) de outros tipos para booleano.
@@ -217,6 +283,9 @@ Em Java, o controle de fluxo (`if`, `while`, etc.) exige **estritamente** um val
 | `true`       | Trata como `true`  | Funciona normalmente   |
 
 #### Exemplo de Código que NÃO funciona em Java:
+
+> [!IMPORTANT]
+> As estruturas condicionais (`if`/`else`), essenciais para o desenvolvimento em qualquer linguagem, são detalhadas no [Capítulo 8](#-capítulo-8-estruturas-condicionais-if-else).
 
 ```java
 int estoque = 0;
@@ -350,7 +419,8 @@ Para comparar números, utilizamos:
 - **Igualdade:** `==`
 - **Desigualdade:** `!=`
 
-> **Atenção:** Comparar dois números de ponto flutuante (`double`) com `==` pode ser arriscado devido a pequenas imprecisões de arredondamento binário.
+> [!IMPORTANT]
+> **Atenção:** Comparar dois números de ponto flutuante (`double`) com `==` é arriscado devido a imprecisões de arredondamento binário.
 
 #### ⚠️ O Perigo da Comparação de Ponto Flutuante
 
@@ -400,7 +470,8 @@ if (v1.compareTo(v2) == 0) {
 
 #### 💵 A Estratégia dos "Centavos Inteiros" (Ponto Fixo)
 
-Uma alternativa muito robusta à comparação com _Epsilon_ ou ao uso do `BigDecimal` é tratar todos os valores decimais como inteiros em sua menor unidade.
+> [!TIP]
+> Uma alternativa muito robusta à comparação com _Epsilon_ ou ao uso do `BigDecimal` é tratar todos os valores decimais como inteiros em sua menor unidade.
 
 #### Como funciona:
 
@@ -428,7 +499,8 @@ if (novoSaldo == 8025) {
 
 #### Quando usar BigInteger nessa estratégia?
 
-Se o sistema for processar quantias astronômicas que podem ultrapassar os 9 quintilhões (limite do `long`), o uso do `BigInteger` aliado à multiplicação por 100 garante que o sistema nunca sofrerá de _overflow_ e manterá a precisão.
+> [!TIP]
+> Se o sistema for processar quantias astronômicas que podem ultrapassar os 9 quintilhões (limite do `long`), o uso do `BigInteger` aliado à multiplicação por 100 garante que o sistema nunca sofrerá de _overflow_ e manterá a precisão.
 
 ---
 
@@ -467,7 +539,8 @@ int precoInteiro = (int) preco; // O valor será 19 (a parte decimal é descarta
 
 ### 4. Além dos Primitivos: O Padrão Corporativo (Enterprise)
 
-Em projetos de grandes empresas (fintechs, e-commerces, sistemas bancários), o uso de `double` ou `float` para dinheiro é proibido. Isso ocorre porque o padrão binário desses tipos causa imprecisões em cálculos decimais (ex: `0.1 + 0.2` pode resultar em `0.30000000000000004`).
+> [!IMPORTANT]
+> Em projetos de grandes empresas (fintechs, e-commerces, sistemas bancários), o uso de `double` ou `float` para dinheiro é **proibido**. Isso ocorre porque o padrão binário desses tipos causa imprecisões em cálculos decimais (ex: `0.1 + 0.2` pode resultar em `0.30000000000000004`).
 
 #### **BigDecimal** (O Rei das Fintechs)
 
@@ -505,6 +578,8 @@ As estruturas de controle de fluxo são os mecanismos que permitem ao Java execu
 ### 1. O Bloco `if-then` (A Condição Simples)
 
 A forma mais básica de controle é o `if`. Ele avalia uma expressão booleana: se for verdadeira, o código dentro das chaves é executado. Se for falsa, o Java simplesmente ignora o bloco.
+
+> **Nota:** A cláusula `if` / `else` é abordada em profundidade neste capítulo (Capítulo 8). Se você encontrar o `if` em exemplos anteriores, é uma prévia deste conceito fundamental.
 
 ```java
 class Car {
@@ -604,182 +679,197 @@ void drive() {
 
 ## ❓ Perguntas Frequentes (FAQ)
 
-### 1. O Java permite criar funções fora de uma classe?
+### FAQ: Estrutura e Classes (Perguntas 1-7)
+
+#### 1. O Java permite criar funções fora de uma classe?
 
 Não. Diferente de linguagens como Python ou JavaScript, no Java **tudo** deve pertencer a uma classe. Isso faz parte da sua arquitetura estritamente orientada a objetos.
 
-### 2. Por que preciso declarar o tipo da variável se o valor já é óbvio?
+#### 2. Por que preciso declarar o tipo da variável se o valor já é óbvio?
 
 Isso ocorre porque o Java é **estaticamente tipado**. O compilador precisa saber exatamente quanta memória reservar e garantir que aquela variável não receba um tipo de dado incompatível no futuro, o que previne erros comuns em tempo de execução.
 
-### 3. Posso mudar o tipo de uma variável depois de declarada?
+#### 3. Posso mudar o tipo de uma variável depois de declarada?
 
 Não. Uma vez que você define `int count = 1;`, a variável `count` será um inteiro até o fim do seu ciclo de vida. Tentar atribuir um texto ou um booleano a ela resultará em um erro de compilação.
 
-### 4. O que acontece se um método não precisar retornar nenhum valor?
+#### 4. O que acontece se um método não precisar retornar nenhum valor?
 
 Embora o texto mencione o uso da palavra-chave `return`, existem casos onde um método apenas executa uma ação (como imprimir algo no console). Nesses casos, utiliza-se a palavra-chave `void` no lugar do tipo de retorno, indicando que o método não devolve nada.
 
-### 5. Qual a diferença entre Parâmetros e Argumentos?
+#### 5. Qual a diferença entre Parâmetros e Argumentos?
 
 Apesar de serem usados de forma intercambiável, tecnicamente:
 
 - **Parâmetros:** São as variáveis listadas na definição do método (ex: `int x, int y`).
 - **Argumentos:** São os valores reais que você passa para o método quando o invoca (ex: `1, 2`).
 
-### 6. Por que usamos o `new` antes do nome da classe para chamar um método?
+#### 6. Por que usamos o `new` antes do nome da classe para chamar um método?
 
 O operador `new` é usado para criar uma **instância** (um objeto) da classe na memória. No exemplo `new Calculator().add(1, 2)`, estamos criando um objeto temporário da calculadora para poder acessar as funcionalidades (métodos) que definimos dentro dela.
 
-### 7. O Java aceita comentários dentro de blocos de código?
+#### 7. O Java aceita comentários dentro de blocos de código?
 
 Sim. Você pode inserir comentários em qualquer lugar do código para documentar a lógica, desde que utilize a sintaxe correta (`//` ou `/* */`). O compilador ignora completamente essas partes.
 
-### 8. Por que Strings são imutáveis?
+---
+
+### FAQ: Strings e Texto (Perguntas 8-12)
+
+#### 8. Por que Strings são imutáveis?
 
 Por questões de **segurança** e **performance**. Como o Java armazena as Strings em um local especial da memória chamado _String Pool_, se elas fossem mutáveis, mudar uma variável poderia acabar alterando outras sem querer, gerando um caos no sistema.
 
-### 9. O que acontece se eu precisar concatenar (juntar) muitas Strings?
+#### 9. O que acontece se eu precisar concatenar (juntar) muitas Strings?
 
 Se você fizer `texto + texto` dentro de um laço de repetição (loop) milhares de vezes, o Java criará milhares de objetos novos, o que é péssimo para a memória. Nesses casos, o ideal é usar uma classe auxiliar chamada `StringBuilder`, que permite modificar o texto de forma eficiente.
 
-### 10. O que é o suporte a Unicode mencionado?
+#### 10. O que é o suporte a Unicode mencionado?
 
 Isso significa que o Java consegue representar nativamente quase todos os caracteres do mundo, incluindo emojis e alfabetos não latinos (como o grego ou japonês), pois cada caractere usa o padrão Unicode.
 
-### 11. Qual a diferença entre `""` (vazia) e `null`?
+#### 11. Qual a diferença entre `""` (vazia) e `null`?
 
 - `""`: É uma String que existe, ocupa memória, mas não tem caracteres (comprimento 0).
 - `null`: Significa que a variável nem sequer aponta para um objeto String. Tentar usar `.length()` em um `null` causará o famoso erro `NullPointerException`.
 
-### 12. Posso transformar outros tipos (como int) em String?
+#### 12. Posso transformar outros tipos (como int) em String?
 
 Sim! O Java oferece métodos estáticos para isso, como o `String.valueOf(10)`, que transforma o número `10` na String `"10"`.
 
-### 13. Posso converter um `int` para `boolean` diretamente?
+---
+
+### FAQ: Lógica e Números (Perguntas 13-35)
+
+#### 13. Posso converter um `int` para `boolean` diretamente?
 
 Não. Em Java, `1` não é `true` e `0` não é `false`. O compilador exige que você use expressões comparativas (ex: `numero != 0`) para obter um valor booleano.
 
-### 14. Qual a diferença entre `&` e `&&`?
+#### 14. Qual a diferença entre `&` e `&&`?
 
 O `&&` é o operador de "curto-circuito" (mencionado acima). O `&` simples também é um operador "AND", mas ele **sempre** avalia os dois lados da expressão, mesmo que o primeiro já seja falso. Na maioria absoluta dos casos, você deve usar `&&`.
 
-### 15. Existe um valor "nulo" para booleanos?
+#### 15. Existe um valor "nulo" para booleanos?
 
 Se você usar o tipo primitivo `boolean`, o valor padrão é sempre `false`. No entanto, se usar a classe _Wrapper_ `Boolean` (com B maiúsculo), a variável pode ser `null`. Mas cuidado: isso pode causar erros se não for tratado!
 
-### 16. Onde os booleanos são mais utilizados?
+#### 16. Onde os booleanos são mais utilizados?
 
 Eles são o coração das estruturas de controle, como o `if`, `while` e `for`. Sem o tipo booleano, o programa não teria como escolher qual bloco de código executar.
 
-### 17. Como o Java avalia `!true && false`?
+#### 17. Como o Java avalia `!true && false`?
 
 Seguindo a precedência: primeiro ele resolve o `!true` (que vira `false`). Depois, resolve `false && false`, resultando em `false`.
 
-### 18. O Java tem algo como o operador `!!` (double bang) do JS para converter coisas em boolean?
+#### 18. O Java tem algo como o operador `!!` (double bang) do JS para converter coisas em boolean?
 
 Não. Como o Java não permite converter tipos como String ou Integer para boolean de forma implícita, o operador `!!` não teria utilidade. Você deve usar métodos específicos, como `string.isEmpty()` ou comparações como `objeto != null`.
 Qualquer estrutura que exija uma condição lógica no Java deve receber algo que resulte em `true` ou `false`. Até mesmo o operador ternário (`condicao ? x : y`) segue essa regra rigorosa.
 
-### 19. Por que `5 / 2` resulta em `2` e não em `2.5`?
+#### 19. Por que `5 / 2` resulta em `2` e não em `2.5`?
 
 Porque ambos os números são inteiros. No Java, uma operação entre dois `int` sempre resultará em um `int`, descartando o que vier após a vírgula. Para obter `2.5`, pelo menos um dos números deve ser um `double`: `5.0 / 2`.
 
-### 20. Qual a diferença real entre `float` e `double`?
+#### 20. Qual a diferença real entre `float` e `double`?
 
 A principal diferença é a precisão e o espaço em memória. O `double` (precisão dupla) consegue armazenar o dobro de casas decimais que o `float`. No dia a dia, use sempre `double`, a menos que esteja trabalhando em um ambiente com memória extremamente restrita.
 
-### 21. O que acontece se eu tentar colocar um número maior que o limite de um `int`?
+#### 21. O que acontece se eu tentar colocar um número maior que o limite de um `int`?
 
 Ocorrerá um erro de compilação se você escrever o número diretamente, ou um **overflow** se o valor for calculado durante a execução (o número "vira" para o valor negativo mais baixo possível). Se precisar de números astronômicos, use o tipo `long` ou a classe `BigInteger`.
 
-### 22. Como eu declaro um número como `long` ou `float` de forma explícita?
+#### 22. Como eu declaro um número como `long` ou `float` de forma explícita?
 
 Para o Java não confundir seu número com um `int` ou `double` padrão, usamos sufixos:
 
 - `long populacao = 8000000000L;` (Letra L)
 - `float temperatura = 36.5f;` (Letra f)
 
-### 23. O Java tem suporte para números complexos ou binários?
+#### 23. O Java tem suporte para números complexos ou binários?
 
 Não nativamente para complexos, mas você pode escrever números em binário ou hexadecimal facilmente:
 
 - **Binário:** `0b1010` (Resulta em 10)
 - **Hexadecimal:** `0xFF` (Resulta em 255)
 
-### 24. Por que o `long` precisa do `L` e o `float` do `f` no final?
+#### 24. Por que o `long` precisa do `L` e o `float` do `f` no final?
 
 Por padrão, o Java interpreta qualquer número inteiro escrito no código como `int` e qualquer número decimal como `double`. Os sufixos avisam ao compilador para tratar o valor com o tipo correto antes de guardá-lo na memória.
 
-### 25. Quando usar `BigDecimal` em vez de `double`?
+#### 25. Quando usar `BigDecimal` em vez de `double`?
 
-**Sempre que envolver dinheiro.** O `double` é mais rápido para processar, mas o `BigDecimal` é o único que garante que um centavo não desapareça em um erro de arredondamento.
+> [!TIP]
+> **Sempre que envolver dinheiro.** O `double` é mais rápido para processar, mas o `BigDecimal` é o único que garante que um centavo não desapareça em um erro de arredondamento.
 
-### 26. O que são as "Wrapper Classes" como `Integer` ou `Double`?
+#### 26. O que são as "Wrapper Classes" como `Integer` ou `Double`?
 
 São versões "objeto" dos tipos primitivos. Elas são necessárias quando você precisa usar coleções (como `ArrayList`) ou quando quer permitir que o valor seja `null`.
 
 - Primitivo: `int` (rápido, ocupa pouco espaço, não pode ser null).
 - Wrapper: `Integer` (mais lento, é um objeto, aceita métodos e null).
 
-### 27. Como evitar o erro de Overflow?
+#### 27. Como evitar o erro de Overflow?
 
 Se você suspeita que um cálculo pode exceder os 2 bilhões de um `int`, mude a variável para `long` preventivamente. Se nem o `long` for suficiente, o `BigInteger` é a sua única saída segura.
 
-### 28. Por que o Java não corrige o erro de arredondamento nos tipos primitivos?
+#### 28. Por que o Java não corrige o erro de arredondamento nos tipos primitivos?
 
 Não é um erro do Java, mas uma limitação física de como computadores processam números decimais em binário. O `double` prioriza **velocidade de processamento** em cálculos complexos. Para precisão absoluta, o custo de performance é maior, por isso existem classes separadas como o `BigDecimal`.
 
-### 29. O `Double.compare(d1, d2)` resolve esse problema?
+#### 29. O `Double.compare(d1, d2)` resolve esse problema?
 
 Não totalmente. O `Double.compare()` é útil para ordenar listas (sort), pois ele trata casos especiais como `NaN` (Not a Number) e `Infinity`, mas ele ainda dirá que `0.30000000000000004` é diferente de `0.3`. Para igualdade lógica, o método do **Epsilon** continua sendo o padrão para primitivos.
 
-### 30. Qual valor de Epsilon devo usar?
+#### 30. Qual valor de Epsilon devo usar?
 
 Depende da sua aplicação. Para engenharia, `0.00001` costuma ser suficiente. Se estiver comparando distâncias astronômicas ou microscópicas, você ajusta essa "tolerância" de acordo com a necessidade do seu projeto.
 
-### 31. Por que usar Strings ao criar um `BigDecimal`?
+#### 31. Por que usar Strings ao criar um `BigDecimal`?
 
 Sempre use o construtor de String: `new BigDecimal("0.1")`. Se você usar `new BigDecimal(0.1)`, você estará passando um `double` impreciso para dentro do `BigDecimal`, carregando o erro de arredondamento para a classe que deveria evitá-lo.
 
-### 32. Essa estratégia de multiplicar por 100 tem alguma desvantagem?
+#### 32. Essa estratégia de multiplicar por 100 tem alguma desvantagem?
 
 O principal cuidado é com a **exibição** e a **divisão**. Você deve lembrar de dividir por 100 apenas na hora de mostrar o valor ao usuário. Além disso, se precisar calcular juros (ex: 5.25%), multiplicar por 100 pode não ser suficiente; nesses casos, usa-se um fator maior, como 10.000 (quatro casas decimais).
 
-### 33. Devo usar `long` ou `BigInteger` para a estratégia dos "Cetanvos Inteiros"?
+#### 33. Devo usar `long` ou `BigInteger` para a estratégia dos "Centavos Inteiros"?
 
 Na maioria dos casos, o `long` é suficiente (ele suporta valores imensos). O `BigInteger` só é necessário se você estiver lidando com valores que realmente podem explodir o limite de 64 bits, como em emissão de moedas nacionais ou criptografia.
 
-### 34. O que acontece na divisão usando essa estratégia?
+#### 34. O que acontece na divisão usando essa estratégia?
 
 Essa é a parte sensível. Se você dividir 150 centavos por 2, terá 75 centavos. Mas se dividir por 4, terá 37.5. Como você está usando inteiros, o Java vai truncar para 37. Para evitar isso, muitos sistemas aumentam a escala (multiplicam por 100.000) para garantir que as divisões mantenham a precisão necessária.
 
-### 35. Como essa estratégia se compara ao `BigDecimal`?
+#### 35. Como essa estratégia se compara ao `BigDecimal`?
 
 O `BigDecimal` é mais fácil de usar porque gerencia a vírgula para você, mas é mais lento. A estratégia de inteiros é mais performática e comum em sistemas onde cada milissegundo de processamento conta.
 
-### 36. Existe um limite de quantos `else if` posso usar?
+---
+
+### FAQ: If/ Else (Perguntas 36-41)
+
+#### 36. Existe um limite de quantos `else if` posso usar?
 
 Não há um limite técnico rígido, mas se você tiver muitos (mais de 5 ou 6), seu código começará a ficar difícil de ler. (No futuro, veremos ferramentas para lidar melhor com isso).
 
-### 37. Qual a diferença entre usar vários `if` seguidos e usar `if-else if`?
+#### 37. Qual a diferença entre usar vários `if` seguidos e usar `if-else if`?
 
 - Com **vários `if`s**, o Java testará **todas** as condições, mesmo que a primeira já tenha sido verdadeira.
 - Com **`if-else if`**, assim que o Java encontra uma condição verdadeira, ele executa o bloco e **pula** todo o restante da estrutura, economizando processamento.
 
-### 38. Posso declarar uma variável dentro de um `if`?
+#### 38. Posso declarar uma variável dentro de um `if`?
 
 Sim, mas ela só existirá dentro daquele bloco `{ }`. Isso é chamado de **escopo local**. Se você tentar usá-la fora do `if`, o código não compilará.
 
-### 39. O que é o "Dangling Else"?
+#### 39. O que é o "Dangling Else"?
 
 É um problema de ambiguidade quando você tem `if`s aninhados sem chaves. O `else` sempre se conectará ao `if` mais próximo dele. Por isso, use sempre chaves para deixar claro a qual `if` o `else` pertence.
 
-### 40. Posso usar um método como condição do `if`?
+#### 40. Posso usar um método como condição do `if`?
 
 Com certeza, desde que o método retorne um `boolean`.
 _Exemplo:_ `if (car.hasFuel()) { ... }`
 
-### 41. Como funciona o "Curto-Circuito" no `if`?
+#### 41. Como funciona o "Curto-Circuito" no `if`?
 
 Se você usar `if (condicaoA && condicaoB)`, e a `condicaoA` for falsa, o Java nem testará a `condicaoB`, pois o resultado final já é garantidamente falso. Isso é ótimo para evitar erros como `if (objeto != null && objeto.isAtivo())`.
