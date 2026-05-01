@@ -36,13 +36,13 @@ if (condicao)
 
 > [!CAUTION]
 > **O Bug da Apple (Goto Fail):** Um dos bugs de segurança mais graves do iOS aconteceu justamente por causa de um `if` sem chaves onde um `goto fail;` extra foi inserido acidentalmente.
-> **Dica de Sênior:** Muitas empresas (como Google e Oracle) proíbem o `if` sem chaves nos seus manuais de estilo. Na dúvida, use chaves.
+> **Dica:** Muitas empresas (como Google e Oracle) proíbem o `if` sem chaves nos seus manuais de estilo. Na dúvida, use chaves.
 
 ---
 
 ## 3. Cláusulas de Guarda (Guard Clauses)
 
-Aqui é onde o "If de uma linha" realmente brilha. Em vez de aninhar vários `if/else`, usamos o `if` minimalista para **validar e sair cedo** (fail-fast).
+A ideia aqui é que comumente são necessárias várias validações em sequencia durante um fluxo e, em vez de aninhar vários `if/else`, usamos o `if` minimalista para **validar e sair cedo** (fail-fast). Você vai ver como o código fica muito mais limpo e claro quando escrito dessa maneira
 
 ### Sem Guard Clause (O "Código Pirâmide"):
 
@@ -66,6 +66,8 @@ public double calcularDesconto(Cliente cliente) {
 ```java
 public double calcularDesconto(Cliente cliente) {
     if (cliente == null || !cliente.isAtivo()) return 0; // Sai cedo
+    // perceba que, invés de validarmos se o cliente é difernete de nulo para dentro do bloco do if fazer o resto das validações,
+    // nós aqui estamos validando se ele é nulo para interromper com antecedência o fluxo.
 
     // O resto do código foca apenas na lógica principal
     return (cliente.getPontos() > 100) ? 0.1 : 0.05;
