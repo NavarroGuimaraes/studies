@@ -159,20 +159,29 @@ int resultado = (condicao) ? valorNulo : 0;
 
 ## FAQ: Perguntas Frequentes
 
-**1. O ternário é mais performático que o `if`?** Não. No nível do Bytecode, o resultado é praticamente idêntico. O JIT (Just-In-Time Compiler) otimiza ambos da mesma forma. Use por **clareza**, não por velocidade.
+### 1. O ternário é mais performático que o `if`?
 
-**2. Posso usar métodos `void` dentro de um ternário?** Não. O compilador espera algo que retorne um valor. Se você quer apenas executar uma ação baseada em uma condição sem precisar de um resultado, use o `if`.
+Não. No nível do Bytecode, o resultado é praticamente idêntico. O JIT (Just-In-Time Compiler) otimiza ambos da mesma forma. Use por **clareza**, não por velocidade.
 
-**3. "Incompatible types": por que recebo esse erro se os dois valores parecem números?** Provavelmente um é `Long` e o outro é `Integer`, ou você está tentando atribuir o resultado a um tipo menor do que o que a promoção numérica gerou. Lembre-se: o Java é um xerife de tipos, ele não assume riscos.
+### 2. Posso usar métodos `void` dentro de um ternário?
 
-**4. O `if` de uma linha é aceitável em retornos de erro?**
+Não. O compilador espera algo que retorne um valor. Se você quer apenas executar uma ação baseada em uma condição sem precisar de um resultado, use o `if`.
+
+### 3. "Incompatible types": por que recebo esse erro se os dois valores parecem números?
+
+Provavelmente um é `Long` e o outro é `Integer`, ou você está tentando atribuir o resultado a um tipo menor do que o que a promoção numérica gerou. Lembre-se: o Java é um xerife de tipos, ele não assume riscos.
+
+### 4. O `if` de uma linha é aceitável em retornos de erro?
+
 Sim, é o uso mais comum e aceito. `if (obj == null) throw new IllegalArgumentException();` é um padrão da indústria para manter o método limpo.
 
-**5. Posso usar `var` com o operador ternário?**
+### 5. Posso usar `var` com o operador ternário?
+
 Sim, mas com cuidado. Como o ternário aplica a promoção numérica (ex: entre `int` e `double`), o `var` assumirá o tipo "mais abrangente".
 `var x = (true) ? 10 : 2.5; // x será double (10.0)`
 
-**6. O que é o "Dangling Else"?**
+### 6. O que é o "Dangling Else"?
+
 É a ambiguidade que acontece quando você tem `if` aninhados sem chaves e um `else` perdido. O `else` sempre se ligará ao `if` mais próximo dele, o que pode não ser o que você pretendia.
 
 ---

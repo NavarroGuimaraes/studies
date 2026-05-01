@@ -139,6 +139,192 @@ Para manter o código limpo e padronizado (Clean Code), o Java segue a convenç�
 - ✅ Correto: `GerenciadorDeContas`, `Car`, `User`
 - ❌ Incorreto: `gerenciador_de_contas`, `carro`, `USUARIO`
 
+#### 4.1 Convenções Expandidas: Métodos, Variáveis e Constantes
+
+```java
+// Métodos: camelCase, sempre com verbo
+public void calcularTotal() { }     // ✅ BOM
+public void exibirResultado() { }   // ✅ BOM
+public void processarDados() { }    // ✅ BOM
+public void calc() { }              // ❌ RUIM: ambíguo
+
+// Variáveis (locais e atributos privados): camelCase
+int idade = 30;                     // ✅ BOM
+String nomeCompleto = "João";       // ✅ BOM
+private double saldoAtual;          // ✅ BOM (mesmo atributo privado!)
+private double saldo_atual;         // ❌ RUIM: não é idiomático
+
+// Constantes: UPPER_SNAKE_CASE
+static final double PI = 3.14159;              // ✅ BOM
+static final int TEMPO_LIMITE_MS = 5000;       // ✅ BOM
+static final String URL_API = "https://...";   // ✅ BOM
+static final double pi = 3.14159;              // ❌ RUIM: constantes devem ser MAIÚSCULAS
+
+// Booleanos: frequentemente com prefixo "is", "has", "can"
+boolean isAtivo = true;             // ✅ BOM
+boolean hasPermissao = false;       // ✅ BOM
+boolean canExecutar = true;         // ✅ BOM
+boolean ativo = true;               // ✅ Também aceitável
+```
+
+**Quadro Resumido:**
+
+| O Quê          | Convenção                  | Exemplo                        | Notas                     |
+| :------------- | :------------------------- | :----------------------------- | :------------------------ |
+| **Classes**    | PascalCase                 | `Usuario`, `ContaBancaria`     | Sempre um substantivo     |
+| **Métodos**    | camelCase                  | `calcular()`, `exibir()`       | Sempre um verbo           |
+| **Variáveis**  | camelCase                  | `idade`, `nomeCompleto`        | Substantivos              |
+| **Constantes** | UPPER_SNAKE_CASE           | `MAX_USUARIOS`, `TEMPO_LIMITE` | `static final`            |
+| **Booleanos**  | camelCase (com "is"/"has") | `isAtivo`, `hasPermissao`      | Deixa claro que é boolean |
+
+#### 4.2 Interfaces: Devo começar com "I"? (Pergunta Avançada)
+
+> [!WARNING]
+> **Essa é uma questão de **convenção corporativa**, não uma regra do Java.**
+
+**A Resposta Curta:**
+
+- ❌ **Não comece interfaces com I em Java moderno.** Essa é uma convenção antiga do C++.
+- ✅ **Java prefere:** Nomear interfaces como se fossem implementações.
+
+```java
+// ❌ EVITAR (convenção antiga do C++)
+public interface IUsuario { }
+public interface IPagamento { }
+
+// ✅ PREFERIR (idiomático em Java)
+public interface Usuario { }
+public interface Pagamento { }
+public interface Serializable { }  // Padrão da JDK
+public interface Comparable { }    // Padrão da JDK
+
+// Implementação fica natural:
+public class UsuarioImpl implements Usuario { }
+// Ou ainda melhor:
+public class UsuarioBD implements Usuario { }
+public class UsuarioComCache implements Usuario { }
+```
+
+**Por que Java rejeitou o padrão "I"?**
+
+1. **Foco na Abstração:** O nome `Usuario` é suficiente; a interface ou classe é um detalhe.
+2. **Documentação:** O compilador já sabe que é uma interface; o nome deve descrever o _comportamento_, não o tipo.
+3. **Flexibilidade:** Se mudar de interface para classe abstrata, não precisa renomear.
+
+**Exceção: Big Tech com padrões antigos**
+
+Algumas empresas legadas (especialmente que vêm do C#) ainda usam `IUsuario`. Se você entrar em um projeto assim, **respeite o padrão local**. Mas em código novo, a comunidade Java prefere não usar o prefixo "I".
+
+#### 4.3 Atributos Privados: Devem ser UPPER_SNAKE_CASE? (Pergunta Avançada)
+
+> [!INFO]
+> **Resposta: Não.** Atributos privados seguem **camelCase**, assim como métodos e variáveis locais.
+
+```java
+public class ContaBancaria {
+    // ❌ ERRADO: confunde com constantes
+    private double SALDO_ATUAL = 0;
+    private String TITULAR = "";
+
+    // ✅ CORRETO: camelCase
+    private double saldoAtual = 0;
+    private String titular = "";
+
+    // ✅ Se for constante (static final), aí sim UPPER_SNAKE_CASE
+    private static final double TAXA_JUROS = 0.05;
+    private static final int TENTATIVAS_MAXIMAS = 3;
+}
+```
+
+**Por que não UPPER_SNAKE_CASE para atributos privados?**
+
+1. **Constantes vs. Variáveis:** UPPER*SNAKE_CASE sinaliza que o valor **nunca muda**. Atributos privados \_podem* mudar.
+2. **Consistência:** Atributos, métodos e variáveis locais usam camelCase; constantes usam UPPER_SNAKE_CASE.
+
+```java
+// Exemplo comparativo
+public class Exemplo {
+    // Constante (nunca muda)
+    private static final double TAXA_JUROS = 0.05;
+
+    // Atributo (pode mudar via setter)
+    private double taxaJuros;  // ← Diferente do acima!
+
+    // Variável local
+    double taxaJuros = 0.03;
+
+    // Método
+    public void calcularJuros() { }
+}
+```
+
+#### 4.4 Nomenclatura em Contextos Corporativos
+
+Diferentes empresas têm padrões diferentes. Aqui estão três abordagens comuns:
+
+**Google (Estilo Moderno):**
+
+```java
+public interface PaymentProcessor { }      // Sem "I"
+public class StripePaymentProcessor implements PaymentProcessor { }
+private static final int RETRY_COUNT = 3;
+private int currentRetries = 0;
+```
+
+**Enterprise Legacy (ex: Banco antigo):**
+
+```java
+public interface ITransacao { }            // Com "I"
+public class TransacaoBD implements ITransacao { }
+private int NUMERO_TENTATIVAS = 0;         // UPPER_SNAKE (menos comum agora)
+```
+
+**Spring/Moderno (Recomendado):**
+
+```java
+public interface UserService { }           // Interface como nome do serviço
+public class UserServiceImpl implements UserService { }
+public static final int MAX_LOGIN_ATTEMPTS = 5;
+private int loginAttempts = 0;
+```
+
+#### 4.5 Checklist de Convenções Corretas
+
+- ✅ Classes: `PascalCase` (`Usuario`, `ContaBancaria`)
+- ✅ Métodos: `camelCase` com verbo (`calcular()`, `exibir()`)
+- ✅ Variáveis/Atributos privados: `camelCase` (`idade`, `saldoAtual`)
+- ✅ Constantes: `UPPER_SNAKE_CASE` (`MAX_USUARIOS`, `TAXA_JUROS`)
+- ✅ Interfaces: `PascalCase` sem "I" (`Serializable`, `Usuario`)
+- ✅ Booleanos: `camelCase` com "is"/"has" (`isAtivo`, `hasPermissao`)
+- ✅ Pacotes: `lowercase` com pontos (`com.empresa.modulo`)
+- ✅ Enums: `PascalCase` para tipo, `UPPER_SNAKE_CASE` para constantes
+
+```java
+// Exemplo completo e correto
+public interface PaymentService {
+    void processPayment(double amount);
+    boolean isPaymentValid(String cardNumber);
+}
+
+public class StripePaymentService implements PaymentService {
+    private static final double TAXA_PROCESSAMENTO = 0.029;
+    private static final int TIMEOUT_MS = 5000;
+
+    private double saldoProcessado = 0;
+    private String ultimoCartao = "";
+
+    @Override
+    public void processPayment(double amount) {
+        // implementação
+    }
+
+    @Override
+    public boolean isPaymentValid(String cardNumber) {
+        // implementação
+    }
+}
+```
+
 ---
 
 ## ⚙️ Capítulo 3: Métodos e Comportamentos
@@ -873,3 +1059,572 @@ _Exemplo:_ `if (car.hasFuel()) { ... }`
 #### 41. Como funciona o "Curto-Circuito" no `if`?
 
 Se você usar `if (condicaoA && condicaoB)`, e a `condicaoA` for falsa, o Java nem testará a `condicaoB`, pois o resultado final já é garantidamente falso. Isso é ótimo para evitar erros como `if (objeto != null && objeto.isAtivo())`.
+
+---
+
+## 🎯 Capítulo 9: Operador Ternário e Switch
+
+Para situações onde você precisa de uma decisão binária simples, o Java oferece alternativas mais compactas que `if-else`.
+
+### 9.1 Operador Ternário (`? :`)
+
+É uma forma condensada de `if-else` que retorna um valor baseado em uma condição.
+
+```java
+// Sintaxe: condicao ? valorSeVerdadeiro : valorSeFalso
+
+int idade = 20;
+String categoria = (idade >= 18) ? "Maior de idade" : "Menor de idade";
+System.out.println(categoria);  // Maior de idade
+```
+
+**Quando usar:**
+
+- ✅ Decisões simples com dois caminhos
+- ✅ Atribuição de um único valor baseado em condição
+- ❌ Lógica complexa ou múltiplos passos
+
+```java
+// ✅ BOM: Ternário simples
+double preco = quantidade > 10 ? preco * 0.9 : preco;
+
+// ❌ RUIM: Ternários aninhados (ilegível!)
+String resultado = (x > 0) ? "positivo" : (x < 0) ? "negativo" : "zero";
+
+// ✅ MELHOR: Usar if-else
+if (x > 0) {
+    resultado = "positivo";
+} else if (x < 0) {
+    resultado = "negativo";
+} else {
+    resultado = "zero";
+}
+```
+
+### 9.2 Estrutura Switch (Java 7+)
+
+Para múltiplas comparações contra **valores específicos**, o `switch` é mais legível que encadear vários `else if`.
+
+```java
+int diaDaSemana = 3;
+String nomeDia;
+
+switch (diaDaSemana) {
+    case 1:
+        nomeDia = "Segunda";
+        break;  // IMPORTANTE: sem break, "cai" para o próximo case!
+    case 2:
+        nomeDia = "Terça";
+        break;
+    case 3:
+        nomeDia = "Quarta";
+        break;
+    case 4:
+        nomeDia = "Quinta";
+        break;
+    case 5:
+        nomeDia = "Sexta";
+        break;
+    case 6:
+    case 7:
+        nomeDia = "Fim de semana";  // Cases 6 e 7 executam o mesmo
+        break;
+    default:
+        nomeDia = "Dia inválido";
+}
+
+System.out.println(nomeDia);
+```
+
+### 9.3 Switch Expression (Java 14+)
+
+A forma moderna de `switch`, que retorna um valor diretamente:
+
+```java
+// Antigo (Java 7-13)
+String dia;
+switch (numero) {
+    case 1: dia = "Segunda"; break;
+    case 2: dia = "Terça"; break;
+    default: dia = "Desconhecido";
+}
+
+// Moderno (Java 14+)
+String dia = switch (numero) {
+    case 1 -> "Segunda";
+    case 2 -> "Terça";
+    default -> "Desconhecido";
+};
+```
+
+---
+
+## 🔄 Capítulo 10: Loops (Repetições)
+
+Quando você precisa executar um bloco de código múltiplas vezes, os loops são essenciais.
+
+### 10.1 O Loop `for` Clássico
+
+```java
+// Sintaxe: for (inicialização; condição; incremento)
+for (int i = 0; i < 5; i++) {
+    System.out.println("Iteração: " + i);
+}
+// Output: Iteração: 0, 1, 2, 3, 4
+```
+
+**Detalhes:**
+
+- **Inicialização:** `int i = 0` — executada uma única vez no início
+- **Condição:** `i < 5` — testada a cada iteração; loop para quando falsa
+- **Incremento:** `i++` — executado a cada fim de iteração
+
+### 10.2 O Loop `while`
+
+Útil quando você não sabe quantas iterações serão necessárias:
+
+```java
+int tentativas = 0;
+while (tentativas < 3) {
+    System.out.println("Tentativa " + tentativas);
+    tentativas++;
+}
+```
+
+### 10.3 O Loop `do-while`
+
+Garante **pelo menos uma execução** do bloco:
+
+```java
+int opcao;
+do {
+    System.out.println("Menu:");
+    System.out.println("1. Opção 1");
+    System.out.println("2. Sair");
+    opcao = obterOpcao();
+} while (opcao != 2);  // Repete enquanto não escolher 2
+```
+
+### 10.4 O Loop `for-each` (Enhanced For)
+
+Iterá sobre todos os elementos de uma coleção sem índices:
+
+```java
+// Sem for-each (verboso)
+int[] notas = {7, 8, 9, 10};
+for (int i = 0; i < notas.length; i++) {
+    System.out.println(notas[i]);
+}
+
+// Com for-each (limpo)
+for (int nota : notas) {
+    System.out.println(nota);
+}
+```
+
+### 10.5 Break e Continue
+
+```java
+// break: sai do loop imediatamente
+for (int i = 0; i < 10; i++) {
+    if (i == 5) break;  // Sai quando i chegar a 5
+    System.out.println(i);
+}
+// Output: 0, 1, 2, 3, 4
+
+// continue: pula para a próxima iteração
+for (int i = 0; i < 5; i++) {
+    if (i == 2) continue;  // Pula quando i = 2
+    System.out.println(i);
+}
+// Output: 0, 1, 3, 4
+```
+
+---
+
+## 📦 Capítulo 11: Wrappers e Autoboxing
+
+Tipos primitivos não são objetos em Java. Às vezes você precisa deles em forma de objeto (especialmente para coleções).
+
+### 11.1 As Wrapper Classes
+
+Cada tipo primitivo tem uma classe wrapper correspondente:
+
+| Primitivo | Wrapper     |
+| :-------- | :---------- |
+| `int`     | `Integer`   |
+| `long`    | `Long`      |
+| `double`  | `Double`    |
+| `boolean` | `Boolean`   |
+| `char`    | `Character` |
+
+```java
+// Método com tipo primitivo
+public void processar(int valor) {
+    System.out.println(valor);
+}
+
+// Para passar em um ArrayList, precisa de Integer
+ArrayList<Integer> numeros = new ArrayList<>();
+numeros.add(10);  // Aceita Integer
+```
+
+### 11.2 Autoboxing e Unboxing
+
+O Java faz a conversão automaticamente:
+
+```java
+// Autoboxing: primitivo → wrapper
+Integer num = 10;  // Na verdade: new Integer(10)
+
+// Unboxing: wrapper → primitivo
+int valor = num;   // Na verdade: num.intValue()
+
+// Em operações também
+Integer a = 5;
+Integer b = 10;
+Integer soma = a + b;  // Unbox → soma → autobox
+```
+
+### 11.3 ⚠️ O Perigo do `null`
+
+```java
+Integer valor = null;
+
+// Isso vai dar NullPointerException!
+int primitivo = valor;  // Tenta unbox de null
+```
+
+---
+
+## 🎯 Capítulo 12: instanceof e Type Casting
+
+### 12.1 Verificando Tipo com `instanceof`
+
+```java
+Object obj = "Olá";
+
+if (obj instanceof String) {
+    String texto = (String) obj;
+    System.out.println(texto.length());
+}
+```
+
+### 12.2 Casting Seguro (Pattern Matching - Java 16+)
+
+```java
+// Antigo (Java 15 e anteriores)
+if (obj instanceof String) {
+    String texto = (String) obj;
+    System.out.println(texto.length());
+}
+
+// Moderno (Java 16+)
+if (obj instanceof String texto) {
+    System.out.println(texto.length());
+}
+```
+
+---
+
+## 🧮 Capítulo 13: Precedência de Operadores
+
+A ordem em que Java avalia expressões pode surpreender:
+
+```java
+// Você espera (2 + 3) * 4 = 20?
+int resultado = 2 + 3 * 4;  // Resultado: 14 (porque * tem prioridade)
+
+// Ordem padrão (do maior ao menor precedência):
+// 1. Multiplicação, Divisão, Módulo (*, /, %)
+// 2. Adição, Subtração (+, -)
+// 3. Comparação (<, >, <=, >=, ==, !=)
+// 4. Lógico AND (&&)
+// 5. Lógico OR (||)
+
+// Sempre use parênteses para deixar claro:
+int resultado = (2 + 3) * 4;  // Claramente 20
+```
+
+---
+
+## 🏢 Capítulo 14: Padrões de Big Tech Companies
+
+### Google: Type Safety
+
+Google enfatiza tipagem forte e validação:
+
+```java
+// Estilo Google
+public final class Usuario {
+    private final String nome;
+    private final int idade;
+
+    public Usuario(String nome, int idade) {
+        this.nome = Objects.requireNonNull(nome, "Nome não pode ser null");
+        this.idade = Preconditions.checkArgument(idade > 0, "Idade deve ser positiva");
+    }
+}
+```
+
+### Netflix: Operational Excellence
+
+Netflix valoriza clareza e debugging:
+
+```java
+// Estilo Netflix: logs e métricas
+public class ServicoAutenticacao {
+    private static final Logger logger = LoggerFactory.getLogger(ServicoAutenticacao.class);
+
+    public boolean autenticar(String usuario, String senha) {
+        logger.info("Tentando autenticar usuario: {}", usuario);
+        try {
+            // lógica
+            logger.debug("Autenticação bem-sucedida");
+            return true;
+        } catch (Exception e) {
+            logger.error("Falha na autenticação", e);
+            return false;
+        }
+    }
+}
+```
+
+### Amazon: Scalability
+
+Amazon pensa em scale desde o início:
+
+```java
+// Estilo Amazon: preparado para millions de requisições
+public class ProcessadorPedidos {
+    private final ExecutorService executor = Executors.newFixedThreadPool(100);
+
+    public void processar(List<Pedido> pedidos) {
+        for (Pedido pedido : pedidos) {
+            executor.submit(() -> processarPedido(pedido));  // Non-blocking
+        }
+    }
+}
+```
+
+---
+
+## ⚡ Capítulo 15: Performance e Otimizações
+
+### 15.1 Escolhendo o Tipo Certo
+
+```java
+// ❌ LENTO: Wrapper desnecessário
+List<Integer> numeros = new ArrayList<>();
+for (int i = 0; i < 1000000; i++) {
+    numeros.add(i);  // Autoboxing: cria novo Integer a cada vez!
+}
+
+// ✅ RÁPIDO: Tipo primitivo
+int[] numeros = new int[1000000];
+for (int i = 0; i < 1000000; i++) {
+    numeros[i] = i;  // Sem alocação de objetos
+}
+```
+
+### 15.2 String Concatenation
+
+```java
+// ❌ LENTO: String concatenation em loop
+String resultado = "";
+for (int i = 0; i < 10000; i++) {
+    resultado += "valor" + i;  // Cria novo String a cada iteração!
+}
+
+// ✅ RÁPIDO: StringBuilder
+StringBuilder sb = new StringBuilder();
+for (int i = 0; i < 10000; i++) {
+    sb.append("valor").append(i);
+}
+String resultado = sb.toString();
+```
+
+### 15.3 Loop Optimization
+
+```java
+// ❌ Menos eficiente: chama .length em cada iteração
+int[] array = new int[1000000];
+for (int i = 0; i < array.length; i++) {  // .length é lido a cada loop!
+    array[i] = i;
+}
+
+// ✅ Mais eficiente: cache o comprimento (em caso de muitos loops aninhados)
+int length = array.length;
+for (int i = 0; i < length; i++) {
+    array[i] = i;
+}
+```
+
+---
+
+## 🚨 Capítulo 16: Anti-patterns e Armadilhas Comuns
+
+### 16.1 Comparison com `==` em Strings
+
+```java
+// ❌ ERRADO
+String s1 = "Java";
+String s2 = new String("Java");
+if (s1 == s2) {  // false! (diferentes objetos)
+    System.out.println("Iguais");
+}
+
+// ✅ CORRETO
+if (s1.equals(s2)) {  // true (mesmo conteúdo)
+    System.out.println("Iguais");
+}
+```
+
+### 16.2 Divisão Inteira Acidental
+
+```java
+// ❌ ERRADO: Resultado é 0 (divisão inteira)
+int resultado = 5 / 2;  // 2, não 2.5!
+
+// ✅ CORRETO
+double resultado = 5.0 / 2;  // 2.5
+double resultado = 5 / 2.0;  // 2.5
+```
+
+### 16.3 Off-by-One Errors
+
+```java
+// ❌ ERRADO: array tem índices 0-9, mas tentamos acessar 0-10
+int[] array = new int[10];
+for (int i = 0; i <= 10; i++) {  // ArrayIndexOutOfBoundsException no i=10!
+    array[i] = i;
+}
+
+// ✅ CORRETO
+for (int i = 0; i < 10; i++) {  // Para em i=9
+    array[i] = i;
+}
+```
+
+### 16.4 Boolean Comparisons
+
+```java
+// ❌ REDUNDANTE
+boolean estaAtivo = true;
+if (estaAtivo == true) {  // Desnecessário!
+    System.out.println("Ativo");
+}
+
+// ✅ LIMPO
+if (estaAtivo) {
+    System.out.println("Ativo");
+}
+
+if (!estaAtivo) {  // Para negação
+    System.out.println("Inativo");
+}
+```
+
+---
+
+## 🎓 Capítulo 17: Var e Type Inference (Java 10+)
+
+A palavra-chave `var` permite que o Java infira o tipo automaticamente:
+
+```java
+// Antes (sempre explícito)
+String nome = "João";
+int idade = 30;
+List<String> nomes = new ArrayList<>();
+
+// Com var (tipo inferido)
+var nome = "João";          // tipo: String
+var idade = 30;             // tipo: int
+var nomes = new ArrayList<String>();  // tipo: ArrayList<String>
+```
+
+**Quando usar:**
+
+- ✅ Quando o tipo é óbvio
+- ✅ Para reduzir verbosidade
+- ❌ Em APIs públicas (use tipos explícitos)
+- ❌ Para nomes confusos
+
+```java
+// ❌ RUIM: O que é 'resultado'?
+var resultado = calcularAlgo();
+
+// ✅ BOM: Claro
+var preco = 19.99;  // Óbvio que é double
+var contador = 0;   // Óbvio que é int
+```
+
+---
+
+## 🔄 Capítulo 18: Evolução de Um Programa Java
+
+Desde novato até sênior, observe como o código evolui:
+
+```
+Nível 1: Iniciante
+├─ Tipos explícitos em tudo
+├─ Muitos if-else nested
+├─ Variáveis com nomes genéricos (x, temp, result)
+└─ Sem tratamento de erro
+
+    ↓
+
+Nível 2: Intermediário
+├─ Loops corretos e eficientes
+├─ Métodos pequenos e focados
+├─ Nomes descritivos
+├─ Try-catch básico
+└─ Uso de StringBuilder em loops
+
+    ↓
+
+Nível 3: Avançado
+├─ Uso correto de tipos (wrapper vs primitivo)
+├─ Performance consciousness
+├─ Padrões de design
+├─ Logging e métricas
+├─ Código testável
+└─ Validação robusta
+
+    ↓
+
+Nível 4: Sênior/Arquiteto
+├─ Type safety agressiva
+├─ Imutabilidade quando possível
+├─ APIs bem pensadas
+├─ Thread-safety
+├─ Escalabilidade desde dia 1
+├─ Documentação clara
+└─ Mentalidade de manutenção a longo prazo
+```
+
+---
+
+## 🎯 Checklist: Fundamentos Sólidos
+
+- ✅ Entendo tipagem estática vs. dinâmica
+- ✅ Posso criar e usar variáveis com tipos corretos
+- ✅ Entendo primitivos vs. wrappers
+- ✅ Posso escrever if-else, for, while sem erros
+- ✅ Conheço quando usar StringBuilder vs String concatenation
+- ✅ Entendo que String são imutáveis e por quê
+- ✅ Sei comparar Strings corretamente (equals, não ==)
+- ✅ Entendo precedência de operadores
+- ✅ Posso debugar erros de tipos
+- ✅ Conheço BigDecimal para dinheiro
+- ✅ Evito armadilhas comuns (off-by-one, boxing, etc)
+
+---
+
+## 📚 Recursos e Próximas Passos
+
+- **Documentação Oficial:** [Java Language Specification](https://docs.oracle.com/javase/specs/)
+- **Tipos:** [Java Wrapper Classes (Oracle)](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html)
+- **Performance:** [Java Performance Tuning Guide](https://docs.oracle.com/en/java/javase/21/performance/index.html)
+- **Padrões:** [Java Design Patterns](https://refactoring.guru/design-patterns/java)
+- **Próximo:** Estude classes, objetos e OOP para construir programas reais
