@@ -873,6 +873,422 @@ scores.merge("Alice", 10, (oldScore, newScore) -> oldScore + newScore);  // 105 
 
 // computeIfAbsent (calcula se não existe)
 scores.computeIfAbsent("Eve", k -> 90);
+
+// =X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X
+
+// Buscar CHAVE a partir do VALOR (Sem Stream)
+String foundKey = null;
+int targetScore = 92;
+
+for (Map.Entry<String, Integer> entry : scores.entrySet()) {
+    if (entry.getValue().equals(targetScore)) {
+        foundKey = entry.getKey();
+        break; // Para o loop assim que encontrar o primeiro
+    }
+    // foundKey agora é "Charlie" ou null se não encontrar
+}
+// Evite usar o keySet() para buscar os valores. O entrySet() é mais eficiente porque ele já te dá a chave e o valor juntos. Usar keySet() e depois scores.get(key) obriga o Java a fazer uma nova busca interna no mapa a cada volta do loop, o que dobra o trabalho desnecessariamente.
+
+// Se você estiver usando Java 10+ já é possível usar for (var entry):
+// for (var entry : scores.entrySet()) {
+    // O Java já entende que entry é um Map.Entry<String, Integer>
+//}
+
+// =X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X
+
+// Buscar CHAVE a partir do VALOR
+// Exemplo: Quem tem a pontuação 92?
+String playerWith92 = scores.entrySet()
+    .stream()
+    .filter(entry -> entry.getValue() == 92)
+    .map(Map.Entry::getKey)
+    .findFirst()
+    .orElse("Não encontrado"); // Retorna "Charlie"
+
+// Nós ainda não abordamos stream. Mas, para ficar claro,  que está acontecendo aqui é o seguinte:
+// 1. entrySet(): Transforma o mapa em um conjunto de pares (entrada contendo chave e valor).
+// 2. stream(): Abre um fluxo para processar esses dados.
+// 3. filter(...): Filtra as entradas onde o valor é igual ao que você busca.
+// 4. map(Map.Entry::getKey): Extrai apenas a chave da entrada que passou no filtro.
+// 5. findFirst(): Pega a primeira ocorrência encontrada (já que podem existir valores duplicados no mapa).
+// 6. orElse(...): Define um valor padrão caso ninguém tenha essa pontuação.
+
+// =X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X=X
+
+// Buscar Todas as chaves que possuem certos valores
+List<String> winners = scores.entrySet()
+    .stream()
+    .filter(e -> e.getValue() == 100)
+    .map(Map.Entry::getKey)
+    .toList(); // Retorna uma lista com ["Alice", ...]
+
+// Aqui acontece algo similar:
+// 1. entrySet(): Transforma o mapa em um conjunto de pares (entrada contendo chave e valor).
+// 2. stream(): Abre um fluxo para processar esses dados.
+// 3. filter(...): Filtra as entradas onde o valor é igual ao que você busca. nesse caso, o valor do elemento deve ser 100
+// 4. map(Map.Entry::getKey): Extrai apenas a chave da entrada que passou no filtro.
+// 5. toList(): Transforma todos os elementos retornados (nesse caso, os valores) para uma lista
+```
+
+### 10.5 HashMap, hashCode() e equals() — Entender a Mágica
+
+HashMap usa **hashCode() e equals()** para funcionar. Você precisa entender como:
+
+#### 10.5.1 O Contrato: hashCode + equals
+
+```java
+// REGRA DE OURO:
+// Se equals(obj) retorna true, então hashCode() DEVE retornar o mesmo valor
+
+// ❌ ERRADO:
+class Pessoa {
+    private String nome;
+
+    @Override
+    public boolean equals(Object obj) {
+        return ((Pessoa) obj).nome.equals(this.nome);
+    }
+
+    @Override
+    public int hashCode() {
+        return 42;  // ❌ SEMPRE retorna 42! Ignora o nome
+    }
+}
+
+// ✅ CORRETO:
+class Pessoa {
+    private String nome;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (!(obj instanceof Pessoa other)) return false;
+        return Objects.equals(nome, other.nome);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nome);  // ✅ Inclui o mesmo campo
+    }
+}
+```
+
+#### 10.5.2 O Problema: Mutabilidade de hashCode
+
+O grande problema aparece quando você **muda a chave após colocá-la no HashMap**:
+
+```java
+// ⚠️ PERIGO: Classe mutável usada como chave
+public class Acao {
+    private String ticker;
+
+    public Acao(String ticker) {
+        this.ticker = ticker;
+    }
+
+    public void setTicker(String ticker) {
+        this.ticker = ticker;  // ⚠️ Muda o estado
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ticker);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (!(obj instanceof Acao other)) return false;
+        return Objects.equals(ticker, other.ticker);
+    }
+}
+
+// O PROBLEMA:
+Acao acao = new Acao("PETR4");
+Map<Acao, Integer> portforio = new HashMap<>();
+portforio.put(acao, 100);  // Armazena em bucket X (baseado em hash de "PETR4")
+
+// ✅ Consegue recuperar
+System.out.println(portforio.get(acao));  // 100
+
+// ❌ PROBLEMA: Muda o ticker
+acao.setTicker("VALE5");  // Agora hashCode() é diferente!
+
+// ❌ Não consegue mais encontrar (procura em bucket Y, mas está no bucket X!)
+System.out.println(portforio.get(acao));  // null ← Objeto perdido!
+
+// Criar outro objeto com mesmo ticker também falha
+Acao outra = new Acao("VALE5");
+System.out.println(portforio.get(outra));  // null (mas `acao` e `outra` são equals!)
+
+// Agora, se voltar o ticker, funciona novamente
+acao.setTicker("PETR4");
+System.out.println(portforio.get(acao));  // 100 ← Volta a funcionar!
+```
+
+**Por que acontece?** HashMap usa **duas etapas para encontrar**:
+
+```
+1️⃣ Calcula hashCode() → Encontra o "bucket"
+2️⃣ Dentro do bucket, chama equals() para comparar
+
+Se o hashCode mudar após inserção:
+❌ Procura no bucket ERRADO
+❌ Mesmo que o objeto esteja no mapa, não encontra!
+```
+
+#### 10.5.3 ✅ SOLUÇÃO: Use Imutáveis como Chaves
+
+```java
+// ✅ CORRETO: Classe imutável (nem setters)
+public final class AcaoImutavel {
+    private final String ticker;
+
+    public AcaoImutavel(String ticker) {
+        this.ticker = ticker;
+    }
+
+    // ❌ Sem setters! Impossível mudar
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ticker);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (!(obj instanceof AcaoImutavel other)) return false;
+        return Objects.equals(ticker, other.ticker);
+    }
+}
+
+// ✅ FUNCIONA PERFEITAMENTE
+AcaoImutavel acao = new AcaoImutavel("PETR4");
+Map<AcaoImutavel, Integer> portforio = new HashMap<>();
+portforio.put(acao, 100);
+
+System.out.println(portforio.get(acao));  // 100
+// Não há risco, pois acao NÃO PODE ser modificada
+```
+
+#### 10.5.4 Tabela: Quando HashCode Muda
+
+| Cenário                            | Antes        | Depois       | Resultado          |
+| ---------------------------------- | ------------ | ------------ | ------------------ |
+| **Chave Imutável**                 | hashCode=100 | hashCode=100 | ✅ Encontra        |
+| **Chave Mutável (não modificada)** | hashCode=100 | hashCode=100 | ✅ Encontra        |
+| **Chave Mutável (modificada)**     | hashCode=100 | hashCode=200 | ❌ Perdido         |
+| **String (imutável)**              | hashCode=100 | hashCode=100 | ✅ Sempre funciona |
+| **Integer (imutável)**             | hashCode=42  | hashCode=42  | ✅ Sempre funciona |
+
+#### 10.5.5 Padrões de Big Tech
+
+**Google Guava:**
+
+```java
+// Usar ImmutableMap.of() para garantir imutabilidade
+Map<String, Integer> precos = ImmutableMap.of(
+    "Maçã", 5,
+    "Banana", 3
+);
+
+// Não há risco de modificar chaves
+```
+
+**Spotify:**
+
+```java
+// Use records (Java 14+) como chaves.
+public record TrackKey(String artistId, String trackId) {}
+
+Map<TrackKey, TrackMetadata> cache = new HashMap<>();
+// Records são imutáveis por padrão ✅
+```
+
+### 10.6 Map.of() e Map.copyOf() — Mapas Imutáveis
+
+#### 10.6.1 Criar Maps Imutáveis com Map.of (Java 9+)
+
+```java
+// ✅ Criar mapa imutável com Map.of
+Map<String, Integer> temperaturas = Map.of(
+    "Segunda", 30,
+    "Terça", 28,
+    "Quarta", 32
+);
+
+// ✅ Ou com Map.ofEntries (mais verboso)
+Map<String, Integer> precos = Map.ofEntries(
+    Map.entry("Maçã", 5),
+    Map.entry("Banana", 3),
+    Map.entry("Laranja", 4)
+);
+
+// ✅ Verificar valores
+System.out.println(temperaturas.get("Segunda"));  // 30
+System.out.println(precos.get("Maçã"));  // 5
+```
+
+#### 10.6.2 O Contrato: Map.of é Imutável
+
+```java
+Map<String, Integer> mapa = Map.of("A", 1, "B", 2);
+
+// ❌ Tentativas de modificação lançam exceção
+mapa.put("C", 3);  // ❌ UnsupportedOperationException
+mapa.remove("A");  // ❌ UnsupportedOperationException
+mapa.clear();  // ❌ UnsupportedOperationException
+
+// ✅ Leitura funciona normalmente
+System.out.println(mapa.get("A"));  // 1
+System.out.println(mapa.size());  // 2
+```
+
+#### 10.6.3 Map.copyOf() — Copiar e Tornar Imutável
+
+```java
+// Começar com HashMap mutável
+Map<String, Integer> mutavel = new HashMap<>();
+mutavel.put("Alice", 30);
+mutavel.put("Bob", 25);
+
+// ✅ Copiar e tornar imutável
+Map<String, Integer> imutavel = Map.copyOf(mutavel);
+
+// ✅ Leitura funciona
+System.out.println(imutavel.get("Alice"));  // 30
+
+// ❌ Modificação não funciona
+imutavel.put("Charlie", 35);  // UnsupportedOperationException
+
+// ✅ Mapa original continua mutável
+mutavel.put("Charlie", 35);
+System.out.println(mutavel.size());  // 3
+
+// ⚠️ MAS: A cópia é independente
+mutavel.remove("Alice");
+System.out.println(imutavel.get("Alice"));  // 30 (ainda existe na cópia!)
+System.out.println(mutavel.get("Alice"));  // null (removido do original)
+```
+
+#### 10.6.4 Limites: Map.of Suporta até 10 Pares
+
+```java
+// ✅ Funciona: até 10 pares
+Map<String, Integer> map10 = Map.of(
+    "1", 1, "2", 2, "3", 3, "4", 4, "5", 5,
+    "6", 6, "7", 7, "8", 8, "9", 9, "10", 10
+);
+
+// ❌ Mais de 10: Precisa usar List + ofEntries
+List<Map.Entry<String, Integer>> entries = Arrays.asList(
+    Map.entry("1", 1),
+    Map.entry("2", 2),
+    Map.entry("3", 3),
+    // ... até 200 se quiser
+    Map.entry("200", 200)
+);
+Map<String, Integer> mapGrande = Map.ofEntries(entries.toArray(new Map.Entry[0]));
+
+// ✅ Alternativa: construir com Stream
+Map<String, Integer> mapStream = Stream.of(
+    Map.entry("1", 1),
+    Map.entry("2", 2),
+    Map.entry("3", 3)
+).collect(Collectors.toUnmodifiableMap(
+    Map.Entry::getKey,
+    Map.Entry::getValue
+));
+```
+
+#### 10.6.5 Comparação: HashMap vs Map.of
+
+| Característica       | HashMap               | Map.of                         |
+| -------------------- | --------------------- | ------------------------------ |
+| **Mutável**          | ✅ put, remove, clear | ❌ Imutável                    |
+| **Thread-safe**      | ❌ Não                | ✅ Sim (por ser imutável)      |
+| **Performance**      | Bom                   | Excelente (otimizado)          |
+| **Memória**          | Mais                  | Menos                          |
+| **Casos de Uso**     | Caches, state mutável | Constantes, retorno de funções |
+| **Null keys/values** | ✅ Permite            | ❌ NPE se tentar               |
+
+#### 10.6.6 Padrões Comuns com Map.of
+
+```java
+// ✅ Retornar constantes sem modificação
+public static final Map<String, String> CORES = Map.of(
+    "red", "#FF0000",
+    "green", "#00FF00",
+    "blue", "#0000FF"
+);
+
+// ✅ Parâmetros de configuração imutáveis
+Map<String, String> config = Map.of(
+    "host", "localhost",
+    "port", "8080",
+    "ssl", "true"
+);
+
+// ✅ Test fixtures com dados conhecidos
+@Test
+public void testComMapOf() {
+    Map<String, Integer> expected = Map.of(
+        "Alice", 100,
+        "Bob", 85,
+        "Charlie", 92
+    );
+
+    Map<String, Integer> actual = scoresService.calculate();
+    assertEquals(expected, actual);
+}
+
+// ✅ Builder pattern com imutáveis
+public class RequestConfig {
+    private final Map<String, String> headers;
+
+    private RequestConfig(Map<String, String> headers) {
+        this.headers = Map.copyOf(headers);  // Garante imutabilidade
+    }
+
+    public static class Builder {
+        private final Map<String, String> headers = new HashMap<>();
+
+        public Builder addHeader(String key, String value) {
+            headers.put(key, value);
+            return this;
+        }
+
+        public RequestConfig build() {
+            return new RequestConfig(headers);  // Torna imutável
+        }
+    }
+}
+```
+
+#### 10.6.7 Anti-pattern: Não Confundir com Collections.unmodifiable
+
+```java
+// ⚠️ ARMADILHA: Collections.unmodifiableMap() é apenas um wrapper
+Map<String, Integer> mutavel = new HashMap<>();
+mutavel.put("A", 1);
+
+Map<String, Integer> unmodi = Collections.unmodifiableMap(mutavel);
+
+// ✅ Funciona
+System.out.println(unmodi.get("A"));  // 1
+
+// ❌ Modifica via UnsupportedOperationException
+unmodi.put("B", 2);  // ❌ Lança exceção
+
+// ⚠️ MAS: Se alterar o mapa original, a "cópia" muda!
+mutavel.put("C", 3);
+System.out.println(unmodi.get("C"));  // 3 ← MUDOU!
+
+// ✅ CORRETO: Use Map.copyOf()
+Map<String, Integer> imutavel = Map.copyOf(mutavel);
+mutavel.put("D", 4);
+System.out.println(imutavel.get("D"));  // null ← Não muda
 ```
 
 ---

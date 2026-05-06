@@ -1840,11 +1840,1265 @@ Versão 4: Enterprise
 
 ---
 
+## 🎭 17. Interfaces: Contratos e Polimorfismo
+
+Uma **interface** define um contrato — um conjunto de responsabilidades que uma classe **promete** cumprir. Enquanto uma classe concreta **é algo** (herança), uma interface define o que algo **faz**.
+
+### 17.1 O Que é Uma Interface?
+
+```
+┌────────────────────────────────┐
+│      CLASSE CONCRETA           │
+│   (o que ele IS-A)             │
+│  Ex: Carro IS-A Veiculo        │
+└────────────────────────────────┘
+
+┌────────────────────────────────┐
+│       INTERFACE                │
+│   (o que ele PODE FAZER)       │
+│  Ex: Carro implementa Dirigivel│
+│       Barco também implementa  │
+│       Dirigivel                │
+└────────────────────────────────┘
+```
+
+**Diferença Conceitual:**
+
+- **Classe:** "O que o objeto é" (hierarquia, herança)
+- **Interface:** "O que o objeto faz" (capacidades, contratos)
+
+```java
+// CLASSE: Define o que é
+public class Cachorro {
+    // É um animal
+    // Tem 4 patas
+    // Tem nome
+}
+
+// INTERFACE: Define o que faz
+public interface Domesticavel {
+    void adestrar();
+    void obedecer();
+}
+
+public interface Latidor {
+    void latir();
+}
+
+// ✅ Cachorro implementa ambos os contratos
+public class Cachorro implements Domesticavel, Latidor {
+    @Override
+    public void adestrar() { ... }
+
+    @Override
+    public void obedecer() { ... }
+
+    @Override
+    public void latir() { ... }
+}
+```
+
+### 17.2 Sintaxe Básica de Interface
+
+```java
+// Define uma interface
+public interface Veiculo {
+    // Métodos abstratos (sem corpo)
+    void acelerar();
+    void frear();
+    void buzinar();
+
+    // Constantes (implicitamente public static final)
+    int VELOCIDADE_MAXIMA = 200;
+}
+
+// Implementar a interface
+public class Carro implements Veiculo {
+    private int velocidade = 0;
+
+    @Override
+    public void acelerar() {
+        if (velocidade < VELOCIDADE_MAXIMA) {
+            velocidade += 10;
+        }
+    }
+
+    @Override
+    public void frear() {
+        velocidade = 0;
+    }
+
+    @Override
+    public void buzinar() {
+        System.out.println("Biiii!");
+    }
+}
+
+// Usar
+Veiculo carro = new Carro();
+carro.acelerar();  // ✅ Funciona
+carro.buzinar();   // Biiii!
+```
+
+**Regra Fundamental:** Uma classe **deve** implementar **todos** os métodos da interface.
+
+### 17.3 Múltiplas Implementações
+
+Uma grande vantagem: uma classe pode implementar **múltiplas interfaces**, diferente de herança (que é "single parent" em Java).
+
+```java
+// Interface 1
+public interface Comestivel {
+    void comer();
+}
+
+// Interface 2
+public interface Brincavel {
+    void brincar();
+}
+
+// Interface 3
+public interface Domesticavel {
+    void adestrar();
+}
+
+// ✅ Uma classe implementa as 3
+public class Cachorro implements Comestivel, Brincavel, Domesticavel {
+    @Override
+    public void comer() {
+        System.out.println("Nom nom");
+    }
+
+    @Override
+    public void brincar() {
+        System.out.println("🎾");
+    }
+
+    @Override
+    public void adestrar() {
+        System.out.println("Aprendendo...");
+    }
+}
+
+// ✅ Também implementa as 3
+public class Gato implements Comestivel, Brincavel, Domesticavel {
+    @Override
+    public void comer() {
+        System.out.println("Miau (comendo)");
+    }
+
+    @Override
+    public void brincar() {
+        System.out.println("🧶");
+    }
+
+    @Override
+    public void adestrar() {
+        System.out.println("Independente demais");
+    }
+}
+
+// Uso polimórfico
+List<Comestivel> animaisFamintos = Arrays.asList(
+    new Cachorro(),
+    new Gato(),
+    new Cachorro()
+);
+
+for (Comestivel animal : animaisFamintos) {
+    animal.comer();  // Cada um come à sua maneira
+}
+```
+
+### 17.4 Comparação: Classe Abstrata vs Interface
+
+| Característica        | Classe Abstrata                  | Interface                  |
+| --------------------- | -------------------------------- | -------------------------- |
+| **Herança**           | Única (`extends`)                | Múltipla (`implements`)    |
+| **Estado**            | ✅ Atributos                     | ❌ Apenas constantes       |
+| **Métodos Abstratos** | ✅ Sim                           | ✅ Sim (todos por padrão)  |
+| **Métodos Concretos** | ✅ Sim                           | ✅ Sim (Java 8+ `default`) |
+| **Construtores**      | ✅ Sim                           | ❌ Não                     |
+| **Modificadores**     | `public`, `private`, `protected` | Sempre `public`            |
+| **Propósito**         | "É um (IS-A)"                    | "Faz isso (pode fazer)"    |
+
+**Quando usar:**
+
+```java
+// ✅ USE CLASSE ABSTRATA
+// - Você quer compartilhar código entre classes
+// - Subclasses têm "é-um" relacionamento
+public abstract class Animal {
+    private String nome;  // Estado compartilhado
+
+    protected void dormir() {  // Implementação compartilhada
+        System.out.println(nome + " dormindo");
+    }
+
+    public abstract void fazerSom();
+}
+
+// ✅ USE INTERFACE
+// - Você quer definir um contrato de comportamento
+// - Múltiplas implementações não relacionadas
+public interface Corrivel {
+    void correr();
+}
+
+// Animal implementa Corrivel
+public class Cachorro extends Animal implements Corrivel {
+    @Override
+    public void fazerSom() { System.out.println("Au!"); }
+
+    @Override
+    public void correr() { System.out.println("🏃"); }
+}
+
+// Pessoa também implementa Corrivel (sem herdar de Animal)
+public class Pessoa implements Corrivel {
+    @Override
+    public void correr() { System.out.println("👨‍🦽"); }
+}
+```
+
+### 17.5 Tipos de Métodos em Interfaces — Guia Completo
+
+Interfaces podem conter **4 tipos diferentes** de métodos, cada um com propósito específico:
+
+#### 17.5.1 Métodos Abstratos (Padrão)
+
+**Apenas a assinatura, sem corpo.** A classe que implementa a interface é **obrigada** a fornecer a implementação.
+
+```java
+// Interface define contrato
+public interface Veiculo {
+    // ❌ Sem corpo, sem implementação
+    void acelerar();
+    void frear();
+    String descricao();
+}
+
+// Classe DEVE implementar todos os métodos abstratos
+public class Carro implements Veiculo {
+    @Override
+    public void acelerar() {  // ✅ OBRIGATÓRIO
+        System.out.println("Carro acelerando...");
+    }
+
+    @Override
+    public void frear() {  // ✅ OBRIGATÓRIO
+        System.out.println("Carro freando...");
+    }
+
+    @Override
+    public String descricao() {  // ✅ OBRIGATÓRIO
+        return "Sou um carro";
+    }
+}
+
+// ❌ Se não implementar TODOS, erro de compilação
+public class Bicicleta implements Veiculo {
+    @Override
+    public void acelerar() { ... }
+
+    @Override
+    public void frear() { ... }
+
+    // ❌ ERRO: descricao() não foi implementado!
+}
+```
+
+**Regra:** Se um método não tem `default` e não tem `static`, ele é abstrato e **obrigatório**.
+
+#### 17.5.2 Métodos Default (Java 8+)
+
+**Possuem implementação padrão.** Podem ser sobrescritos, mas não são obrigatórios.
+
+**Benefício:** Adicionar novos métodos a interfaces antigas **sem quebrar** classes que já as implementam.
+
+```java
+// ❌ PRÉ-Java 8: Adicionar método quebra tudo
+public interface Veiculo {
+    void acelerar();
+    void frear();
+    void buzinar();  // ← NOVO MÉTODO
+    // Agora TODAS as 1000 classes que implementam Veiculo quebram!
+}
+
+// ✅ Java 8+: Use default
+public interface Veiculo {
+    void acelerar();
+    void frear();
+
+    // Default method: não quebra ninguém
+    default void buzinar() {
+        System.out.println("Biiiiip!");  // Implementação padrão
+    }
+}
+
+// Implementações ANTIGAS continuam funcionando!
+public class Carro implements Veiculo {
+    @Override
+    public void acelerar() { ... }
+
+    @Override
+    public void frear() { ... }
+
+    // buzinar() é automaticamente herdada com a implementação default
+}
+
+// Uso
+Carro carro = new Carro();
+carro.buzinar();  // Usa a implementação default: "Biiiiip!"
+```
+
+**Exemplo Completo: Evolução de Interface**
+
+```java
+// ✅ Interface v1.0
+public interface Persistivel {
+    void salvar();
+    void deletar();
+}
+
+// 50 classes implementam Persistivel...
+
+// ✅ Interface v2.0: Nova funcionalidade sem quebrar ninguém
+public interface Persistivel {
+    void salvar();
+    void deletar();
+
+    // Novo método com default (100% compatível com versão 1.0)
+    default void exportarJSON() {
+        System.out.println("Exportando para JSON...");
+    }
+
+    // Novo método com lógica padrão comum
+    default void validarAntesSalvar() {
+        System.out.println("Validando dados...");
+        // Lógica padrão que vale para 90% dos casos
+    }
+}
+
+// Classes antigas funcionam sem mudança!
+public class Produto implements Persistivel {
+    @Override
+    public void salvar() { ... }
+
+    @Override
+    public void deletar() { ... }
+
+    // exportarJSON() e validarAntesSalvar() herdadas automaticamente
+}
+
+// Novo código pode sobrescrever se precisar
+public class Usuario implements Persistivel {
+    @Override
+    public void salvar() { ... }
+
+    @Override
+    public void deletar() { ... }
+
+    // Sobrescreve o default com lógica específica
+    @Override
+    public void validarAntesSalvar() {
+        if (email == null) throw new IllegalStateException("Email obrigatório");
+        super.validarAntesSalvar();  // Chama default + adiciona lógica
+    }
+}
+```
+
+**Quando usar default methods:**
+
+```java
+// ✅ BOM: Implementação comum para 90% dos casos
+public interface Formatador {
+    default String formatarData(LocalDate data) {
+        return data.format(DateTimeFormatter.ISO_LOCAL_DATE);
+    }
+}
+
+// ✅ BOM: Backward compatibility
+public interface API {
+    void autenticar();
+
+    // Novo método com comportamento padrão sensível
+    default void logRequest() {
+        System.out.println("Requisição registrada em log");
+    }
+}
+
+// ❌ RUIM: Default method com lógica muito complexa
+public interface Processador {
+    // Evite métodos default muito grandes
+    // Prefira deixar com implementações reais
+    default void processarCompleto() {
+        // 500 linhas de código...
+    }
+}
+```
+
+#### 17.5.3 Métodos Static (Java 8+)
+
+**Métodos utilitários que pertencem à interface.** NÃO podem ser sobrescritos. Usam a notação `Interface.metodo()`.
+
+```java
+// Interface com métodos static (utilitários)
+public interface Calculadora {
+    // Método abstrato
+    double calcular();
+
+    // Método static (utilitário)
+    static double somar(double a, double b) {
+        return a + b;
+    }
+
+    static double subtrair(double a, double b) {
+        return a - b;
+    }
+
+    static double multiplicar(double a, double b) {
+        return a * b;
+    }
+}
+
+// Uso direto pela interface, não por instância
+public class Teste {
+    public static void main(String[] args) {
+        // ✅ Chamada estática direto na interface
+        System.out.println(Calculadora.somar(10, 5));        // 15
+        System.out.println(Calculadora.subtrair(10, 5));     // 5
+        System.out.println(Calculadora.multiplicar(10, 5));  // 50
+
+        // ❌ NÃO pode chamar por instância
+        // Calculadora calc = ...;
+        // calc.somar(10, 5);  // ERRO!
+    }
+}
+
+// ❌ Não pode ser sobrescrito
+public class MinhaCalculadora implements Calculadora {
+    @Override
+    public double calcular() { return 0; }
+
+    // ❌ ERRO: Não pode sobrescrever método static
+    // @Override
+    // public static double somar(double a, double b) { return 0; }
+}
+```
+
+**Exemplo Real: Factory Method Pattern**
+
+```java
+// Interface com static factory method
+public interface Usuario {
+    String getNome();
+    String getEmail();
+
+    // Static factory method (muito comum!)
+    static Usuario criar(String nome, String email) {
+        return new UsuarioImpl(nome, email);
+    }
+
+    static Usuario admin(String nome) {
+        return new UsuarioImpl(nome, "admin@empresa.com");
+    }
+
+    // Implementação anônima
+    static Usuario mock() {
+        return new Usuario() {
+            @Override
+            public String getNome() { return "Mock User"; }
+
+            @Override
+            public String getEmail() { return "mock@test.com"; }
+        };
+    }
+}
+
+// Implementação privada (só acessível via factory)
+class UsuarioImpl implements Usuario {
+    private String nome;
+    private String email;
+
+    public UsuarioImpl(String nome, String email) {
+        this.nome = nome;
+        this.email = email;
+    }
+
+    @Override
+    public String getNome() { return nome; }
+
+    @Override
+    public String getEmail() { return email; }
+}
+
+// Uso elegante
+public class Aplicacao {
+    public static void main(String[] args) {
+        // ✅ Factory methods tornam criação legível
+        Usuario user = Usuario.criar("João", "joao@email.com");
+        Usuario adminUser = Usuario.admin("Maria");
+        Usuario testUser = Usuario.mock();
+
+        System.out.println(user.getNome());      // João
+        System.out.println(adminUser.getEmail()); // admin@empresa.com
+        System.out.println(testUser.getNome());   // Mock User
+    }
+}
+```
+
+**Quando usar métodos static em interfaces:**
+
+```java
+// ✅ BOM: Factory methods
+public interface Conexao {
+    static Conexao conectar(String url) { ... }
+    static Conexao mock() { ... }
+}
+
+// ✅ BOM: Utilitários relacionados
+public interface Validador {
+    boolean validar(String texto);
+
+    static boolean isEmail(String texto) {
+        return texto.contains("@");
+    }
+
+    static boolean isURL(String texto) {
+        return texto.startsWith("http");
+    }
+}
+
+// ❌ RUIM: Misturar lógica de instância com static
+public interface Modelo {
+    void salvar();  // Instância
+
+    // Confuso: não sei se preciso de instância ou não
+    static void salvarTodos(List<Modelo> modelos) { ... }
+}
+```
+
+#### 17.5.4 Métodos Private (Java 9+)
+
+**Usados APENAS internamente** dentro da interface. Servem para **reutilizar código** entre métodos `default`.
+
+```java
+// ✅ Interface com métodos private
+public interface Persistivel {
+    void salvar();
+
+    default void salvarComValidacao() {
+        validar();  // Chama método privado
+        salvar();
+    }
+
+    default void salvarComLog() {
+        logarInicio();  // Chama método privado
+        salvar();
+        logarFim();     // Chama método privado
+    }
+
+    // ✅ Métodos private para evitar duplicação
+    private void validar() {
+        System.out.println("Validando dados...");
+    }
+
+    private void logarInicio() {
+        System.out.println("[LOG] Iniciando salvamento...");
+    }
+
+    private void logarFim() {
+        System.out.println("[LOG] Salvamento concluído");
+    }
+}
+
+// Implementação
+public class Documento implements Persistivel {
+    @Override
+    public void salvar() {
+        System.out.println("Salvando documento...");
+    }
+}
+
+// Uso
+Documento doc = new Documento();
+doc.salvarComValidacao();  // Chama validar() + salvar() internamente
+// Output:
+// Validando dados...
+// Salvando documento...
+
+doc.salvarComLog();  // Chama logarInicio() + salvar() + logarFim()
+// Output:
+// [LOG] Iniciando salvamento...
+// Salvando documento...
+// [LOG] Salvamento concluído
+
+// ❌ Não pode chamar métodos privados de fora
+// doc.validar();  // ERRO: private não é acessível
+```
+
+**Exemplo Real: Evitar Duplicação de Código**
+
+```java
+// ❌ SEM métodos private: duplicação
+public interface API {
+    default Response get(String url) {
+        validarURL(url);
+        logRequest("GET", url);
+        return executeRequest(url, "GET");
+    }
+
+    default Response post(String url, String body) {
+        validarURL(url);
+        validarBody(body);
+        logRequest("POST", url);
+        return executeRequest(url, "POST", body);
+    }
+
+    default Response put(String url, String body) {
+        validarURL(url);
+        validarBody(body);
+        logRequest("PUT", url);
+        return executeRequest(url, "PUT", body);
+    }
+
+    // Código repetido em todos...
+    private void validarURL(String url) { ... }
+    private void validarBody(String body) { ... }
+    private void logRequest(String method, String url) { ... }
+    private Response executeRequest(String url, String method, String... args) { ... }
+}
+
+// ✅ COM métodos private: limpo e reutilizável
+public interface API {
+    default Response get(String url) {
+        return executarComValidacao(url, "GET", null);
+    }
+
+    default Response post(String url, String body) {
+        return executarComValidacao(url, "POST", body);
+    }
+
+    default Response put(String url, String body) {
+        return executarComValidacao(url, "PUT", body);
+    }
+
+    // Extrai lógica comum
+    private Response executarComValidacao(String url, String method, String body) {
+        validarURL(url);
+        if (body != null) validarBody(body);
+        logRequest(method, url);
+        return executeRequest(url, method, body);
+    }
+
+    private void validarURL(String url) {
+        if (url == null || url.isEmpty()) throw new IllegalArgumentException("URL inválida");
+    }
+
+    private void validarBody(String body) {
+        if (body == null || body.isEmpty()) throw new IllegalArgumentException("Body inválido");
+    }
+
+    private void logRequest(String method, String url) {
+        System.out.println("[API] " + method + " " + url);
+    }
+
+    private Response executeRequest(String url, String method, String body) {
+        // Implementação real
+        return new Response(200, "OK");
+    }
+}
+```
+
+#### 17.5.5 Tabela Comparativa: Todos os Tipos de Métodos
+
+| Tipo         | Assinatura                       | Corpo  | Sobrescrita    | Chamada              | Java | Uso               |
+| ------------ | -------------------------------- | ------ | -------------- | -------------------- | ---- | ----------------- |
+| **Abstrato** | `return type name();`            | ❌ Não | ✅ Obrigatória | Instância            | 1.0+ | Contrato          |
+| **Default**  | `default return type name() { }` | ✅ Sim | ✅ Opcional    | Instância            | 8+   | Compatibilidade   |
+| **Static**   | `static return type name() { }`  | ✅ Sim | ❌ Não         | `Interface.method()` | 8+   | Utilitários       |
+| **Private**  | `private return type name() { }` | ✅ Sim | ❌ Não         | Internamente         | 9+   | Reutilizar código |
+
+#### 17.5.6 Exemplo Completo: Interface Profissional
+
+```java
+// ✅ Interface moderna com todos os tipos de métodos
+public interface Repositorio<T> {
+    // 1️⃣ ABSTRATO: Implementação obrigatória
+    void salvar(T entidade);
+    T buscarPorId(long id);
+    void deletar(long id);
+
+    // 2️⃣ DEFAULT: Implementação com fallback
+    default void salvarVarios(List<T> entidades) {
+        for (T entidade : entidades) {
+            salvar(entidade);
+        }
+    }
+
+    default boolean existe(long id) {
+        return buscarPorId(id) != null;
+    }
+
+    // 3️⃣ STATIC: Factory e utilitários
+    static <T> Repositorio<T> criar(Class<T> tipo) {
+        return new RepositorioSQL<>(tipo);
+    }
+
+    static <T> Repositorio<T> mock() {
+        return new RepositorioMock<>();
+    }
+
+    // 4️⃣ PRIVATE: Lógica interna compartilhada
+    private void validarAntesSalvar(T entidade) {
+        if (entidade == null) {
+            throw new IllegalArgumentException("Entidade não pode ser null");
+        }
+    }
+
+    private void logOperacao(String operacao, long id) {
+        System.out.println("[REPO] " + operacao + " - ID: " + id);
+    }
+}
+
+// Implementação concreta
+public class RepositorioSQL<T> implements Repositorio<T> {
+    private Class<T> tipo;
+
+    public RepositorioSQL(Class<T> tipo) {
+        this.tipo = tipo;
+    }
+
+    @Override
+    public void salvar(T entidade) {
+        System.out.println("Salvando " + tipo.getSimpleName());
+    }
+
+    @Override
+    public T buscarPorId(long id) {
+        System.out.println("Buscando por ID: " + id);
+        return null;
+    }
+
+    @Override
+    public void deletar(long id) {
+        System.out.println("Deletando ID: " + id);
+    }
+}
+
+// Uso
+public class Aplicacao {
+    public static void main(String[] args) {
+        // Static factory method
+        Repositorio<Usuario> repo = Repositorio.criar(Usuario.class);
+
+        // Métodos abstratos (implementados)
+        Usuario user = new Usuario("João");
+        repo.salvar(user);
+
+        // Métodos default (herdados ou sobrescritos)
+        repo.salvarVarios(Arrays.asList(user));
+        boolean existe = repo.existe(1);
+
+        // Static methods (utilitários)
+        Repositorio<Usuario> mock = Repositorio.mock();
+    }
+}
+```
+
+### 17.6 Interfaces Comuns da Java Library
+
+#### 17.6.1 `Comparable<T>` — Ordenação Padrão
+
+```java
+// Define ordem natural
+public class Pessoa implements Comparable<Pessoa> {
+    private String nome;
+    private int idade;
+
+    public Pessoa(String nome, int idade) {
+        this.nome = nome;
+        this.idade = idade;
+    }
+
+    @Override
+    public int compareTo(Pessoa outra) {
+        // Retorna:
+        // Negativo: this < outra
+        // 0: this == outra
+        // Positivo: this > outra
+
+        // Comparar por idade
+        return Integer.compare(this.idade, outra.idade);
+    }
+
+    @Override
+    public String toString() {
+        return nome + " (" + idade + ")";
+    }
+}
+
+// Uso
+List<Pessoa> pessoas = Arrays.asList(
+    new Pessoa("Maria", 30),
+    new Pessoa("João", 25),
+    new Pessoa("Ana", 35)
+);
+
+Collections.sort(pessoas);  // Usa compareTo()
+System.out.println(pessoas);
+// [João (25), Maria (30), Ana (35)]
+```
+
+#### 17.6.2 `Comparator<T>` — Ordenação Customizada
+
+```java
+// Comparar por nome em vez de idade
+Comparator<Pessoa> porNome = new Comparator<Pessoa>() {
+    @Override
+    public int compare(Pessoa p1, Pessoa p2) {
+        return p1.nome.compareTo(p2.nome);
+    }
+};
+
+List<Pessoa> pessoas = /* ... */;
+Collections.sort(pessoas, porNome);
+System.out.println(pessoas);
+// [Ana (35), João (25), Maria (30)]
+
+// Java 8+: Lambda mais conciso
+pessoas.sort((p1, p2) -> p1.nome.compareTo(p2.nome));
+```
+
+#### 17.6.3 `Cloneable` — Copiar Objetos
+
+```java
+// Marcar que pode ser clonado
+public class Pessoa implements Cloneable {
+    private String nome;
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();  // Cópia rasa
+    }
+}
+
+// Uso
+Pessoa p1 = new Pessoa("João");
+Pessoa p2 = (Pessoa) p1.clone();
+p2.nome = "Maria";
+
+System.out.println(p1.nome);  // João
+System.out.println(p2.nome);  // Maria
+```
+
+⚠️ **Nota:** `Cloneable` é problemática. Melhor usar construtores cópia ou Builder.
+
+#### 17.6.4 `Iterable<T>` — Loops com For-Each
+
+```java
+// Permite usar em for-each
+public class MinhaColecao implements Iterable<String> {
+    private List<String> items = new ArrayList<>();
+
+    public void adicionar(String item) {
+        items.add(item);
+    }
+
+    @Override
+    public Iterator<String> iterator() {
+        return items.iterator();
+    }
+}
+
+// Uso
+MinhaColecao col = new MinhaColecao();
+col.adicionar("A");
+col.adicionar("B");
+
+for (String item : col) {  // Usa iterator()
+    System.out.println(item);
+}
+```
+
+#### 17.6.5 `AutoCloseable` — Try-with-resources
+
+```java
+// Permite fechar recursos automaticamente
+public class Conexao implements AutoCloseable {
+    private boolean aberta = true;
+
+    public void query(String sql) {
+        if (!aberta) throw new IllegalStateException("Conexão fechada");
+        System.out.println("Executando: " + sql);
+    }
+
+    @Override
+    public void close() {
+        aberta = false;
+        System.out.println("Conexão fechada");
+    }
+}
+
+// Uso
+try (Conexao conn = new Conexao()) {
+    conn.query("SELECT * FROM usuarios");
+    // close() é chamado automaticamente aqui
+} catch (Exception e) {
+    e.printStackTrace();
+}
+```
+
+### 17.7 Herança de Interfaces
+
+Interfaces podem estender outras interfaces (múltipla herança de interfaces é permitida).
+
+```java
+// Interface 1
+public interface Comparable<T> {
+    int compareTo(T o);
+}
+
+// Interface 2
+public interface Sortable {
+    void sort();
+}
+
+// Interface 3: Herda das duas
+public interface Ordenavel<T> extends Comparable<T>, Sortable {
+    // Herda compareTo e sort
+    void reordenar();
+}
+
+// Implementar
+public class Lista<T> implements Ordenavel<T> {
+    @Override
+    public int compareTo(T o) { return 0; }
+
+    @Override
+    public void sort() { System.out.println("Sorting..."); }
+
+    @Override
+    public void reordenar() { System.out.println("Reordenando..."); }
+}
+```
+
+### 17.8 Padrões Comuns: Interfaces em Produção
+
+#### 17.8.1 Strategy Pattern (Comportamento Intercambiável)
+
+```java
+// Interface define estratégia
+public interface EstrategiaCalculo {
+    double calcular(double a, double b);
+}
+
+// Múltiplas implementações
+public class Adicao implements EstrategiaCalculo {
+    @Override
+    public double calcular(double a, double b) { return a + b; }
+}
+
+public class Multiplicacao implements EstrategiaCalculo {
+    @Override
+    public double calcular(double a, double b) { return a * b; }
+}
+
+// Cliente usa qualquer estratégia
+public class Calculadora {
+    private EstrategiaCalculo estrategia;
+
+    public Calculadora(EstrategiaCalculo estrategia) {
+        this.estrategia = estrategia;
+    }
+
+    public double executar(double a, double b) {
+        return estrategia.calcular(a, b);
+    }
+}
+
+// Uso
+Calculadora calc = new Calculadora(new Multiplicacao());
+System.out.println(calc.executar(5, 3));  // 15
+
+calc = new Calculadora(new Adicao());
+System.out.println(calc.executar(5, 3));  // 8
+```
+
+#### 17.8.2 Observer Pattern (Pub-Sub)
+
+```java
+// Interface para observadores
+public interface Observador {
+    void atualizar(String evento);
+}
+
+// Implementações
+public class LoggingObservador implements Observador {
+    @Override
+    public void atualizar(String evento) {
+        System.out.println("LOG: " + evento);
+    }
+}
+
+public class EmailObservador implements Observador {
+    @Override
+    public void atualizar(String evento) {
+        System.out.println("Email enviado: " + evento);
+    }
+}
+
+// Classe que notifica
+public class EventoBotao {
+    private List<Observador> observadores = new ArrayList<>();
+
+    public void adicionarObservador(Observador obs) {
+        observadores.add(obs);
+    }
+
+    public void clicar() {
+        notificarObservadores("Botão clicado");
+    }
+
+    private void notificarObservadores(String evento) {
+        for (Observador obs : observadores) {
+            obs.atualizar(evento);
+        }
+    }
+}
+
+// Uso
+EventoBotao botao = new EventoBotao();
+botao.adicionarObservador(new LoggingObservador());
+botao.adicionarObservador(new EmailObservador());
+
+botao.clicar();
+// LOG: Botão clicado
+// Email enviado: Botão clicado
+```
+
+### 17.9 Padrões de Big Tech
+
+#### 17.9.1 Google: Functional Interfaces
+
+Google usa interfaces pequenas e focadas:
+
+```java
+// Interface funcional (Java 8+): apenas 1 método abstrato
+@FunctionalInterface
+public interface Operacao {
+    int executar(int a, int b);
+}
+
+// Pode usar com lambda
+Operacao soma = (a, b) -> a + b;
+Operacao mult = (a, b) -> a * b;
+
+System.out.println(soma.executar(5, 3));  // 8
+System.out.println(mult.executar(5, 3));  // 15
+```
+
+#### 17.9.2 Netflix: Inheritance Hierarchies
+
+Netflix modela domínio com interfaces:
+
+```java
+// Interface base para todos os títulos
+public interface Titulo {
+    String getTitulo();
+    int getDuracao();
+}
+
+// Interfaces especializadas
+public interface Serie extends Titulo {
+    int getTemporadas();
+}
+
+public interface Filme extends Titulo {
+    String getGenero();
+}
+
+// Implementação
+public class SerieNetflix implements Serie {
+    @Override
+    public String getTitulo() { return "Stranger Things"; }
+
+    @Override
+    public int getDuracao() { return 45; }
+
+    @Override
+    public int getTemporadas() { return 4; }
+}
+```
+
+#### 17.9.3 Spring Framework: Dependency Injection
+
+Spring usa interfaces para inversão de controle:
+
+```java
+// Interface define contrato
+public interface RepositorioUsuario {
+    Usuario findById(int id);
+    void save(Usuario usuario);
+}
+
+// Implementação
+@Repository
+public class RepositorioUsuarioSQL implements RepositorioUsuario {
+    @Override
+    public Usuario findById(int id) { /* SQL query */ }
+
+    @Override
+    public void save(Usuario usuario) { /* SQL insert */ }
+}
+
+// Serviço injeta interface (não implementação)
+@Service
+public class ServicoUsuario {
+    @Autowired
+    private RepositorioUsuario repositorio;  // Interface!
+
+    public Usuario buscar(int id) {
+        return repositorio.findById(id);
+    }
+}
+
+// Troca fácil de implementação sem mudar ServicoUsuario
+@Repository
+public class RepositorioUsuarioMongoDB implements RepositorioUsuario {
+    @Override
+    public Usuario findById(int id) { /* MongoDB query */ }
+
+    @Override
+    public void save(Usuario usuario) { /* MongoDB insert */ }
+}
+```
+
+### 17.10 Anti-patterns: O Que NÃO Fazer
+
+#### 17.10.1 Interface Grande Demais (God Interface)
+
+```java
+// ❌ PÉSSIMO: Interface que tenta fazer tudo
+public interface Servico {
+    void criar();
+    void ler();
+    void atualizar();
+    void deletar();
+    void enviarEmail();
+    void gerarPDF();
+    void autenticar();
+    void autorizavel();
+    void fazer100coisasMais();
+}
+
+// ✅ CORRETO: Interfaces pequenas e focadas
+public interface Persistencia {
+    void criar();
+    void ler();
+    void atualizar();
+    void deletar();
+}
+
+public interface EmailSender {
+    void enviarEmail();
+}
+
+public interface PDFGenerator {
+    void gerarPDF();
+}
+
+public interface Autenticacao {
+    boolean autenticar();
+}
+```
+
+#### 17.10.2 Implementar Mas Não Usar (Dead Code)
+
+```java
+// ❌ RUIM: Implementa mas nunca usa
+public class Pessoa implements Persistivel {
+    @Override
+    public void salvar() {
+        // Nunca é chamada em lugar nenhum
+    }
+
+    @Override
+    public void deletar() {
+        // Também nunca
+    }
+}
+
+// ✅ MELHOR: Implementar apenas se precisa mesmo
+public class Pessoa implements Persistivel {
+    @Override
+    public void salvar() {
+        // Realmente usada
+        persistirNoBancoDados();
+    }
+}
+```
+
+#### 17.10.3 Casting Excessivo
+
+```java
+// ❌ ANTI-PATTERN: Depois faz casting (perde a vantagem da interface)
+List<Veiculo> veiculos = Arrays.asList(
+    new Carro(),
+    new Moto(),
+    new Bicicleta()
+);
+
+for (Veiculo v : veiculos) {
+    if (v instanceof Carro) {
+        Carro c = (Carro) v;
+        c.metodoEspecificoCarro();
+    }
+}
+
+// ✅ MELHOR: Cada tipo implement sua interface
+for (Veiculo v : veiculos) {
+    v.acelerar();  // Polimorfismo, sem casting
+}
+```
+
+### 17.11 Sealed Interfaces (Java 17+)
+
+Controlar quais classes implementam a interface:
+
+```java
+// ✅ Java 17+: Apenas classes específicas podem implementar
+public sealed interface Pagamento permits
+    PagamentoCartao,
+    PagamentoBoleto,
+    PagamentoPix {
+    void processar(double valor);
+}
+
+// Implementações
+public final class PagamentoCartao implements Pagamento {
+    @Override
+    public void processar(double valor) { ... }
+}
+
+public final class PagamentoBoleto implements Pagamento {
+    @Override
+    public void processar(double valor) { ... }
+}
+
+// ❌ NÃO PODE: Classe não está na lista
+// public class PagamentoOutro implements Pagamento { }  // Erro!
+```
+
+---
+
 ## 📚 Recursos e Próximas Passos
 
 - **Documentação Oficial:** [java.lang.Object (Oracle Docs)](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html)
 - **Padrões:** [Design Patterns: Builder Pattern](https://refactoring.guru/design-patterns/builder)
+- **Interfaces:** [Java Interfaces (Oracle Docs)](https://docs.oracle.com/javase/tutorial/java/concepts/interface.html)
 - **Imutabilidade:** [Effective Java - Item 17: Design and document for inheritance or prohibit it](https://learning.oreilly.com/library/view/effective-java-3rd/9780134685991/)
 - **Arquitetura:** [Clean Code - Robert C. Martin](https://www.oreilly.com/library/view/clean-code-a/9780136083238/)
 - **Spring Framework:** [Spring Official Documentation](https://spring.io/projects/spring-framework)
-- **Próximo:** Estude interfaces, herança profunda e polimorfismo para dominar OOP completamente
+- **Próximo:** Estude herança profunda, polimorfismo avançado e sealed classes para dominar OOP completamente
