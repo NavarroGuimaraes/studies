@@ -151,6 +151,78 @@ System.out.println(lista.size());  // 3 (não remove duplicatas)
 System.out.println(lista);  // [Java, Java, Java]
 ```
 
+### 2.5 List.of() — Criando Unmodifiable Lists (Java 9+)
+
+A partir do Java 9, você pode usar `List.of()` para criar **listas imutáveis** rapidamente:
+
+```java
+// ✅ Criando listas imutáveis com List.of()
+List<Integer> numeros = List.of(1, 2, 3, 4, 5);
+List<String> nomes = List.of("Alice", "Bob", "Charlie");
+List<Object> misto = List.of(1, "texto", true, null);
+
+System.out.println(numeros);  // [1, 2, 3, 4, 5]
+System.out.println(numeros.size());  // 5
+System.out.println(numeros.get(0));  // 1
+```
+
+**Características de Listas criadas com `List.of()`:**
+
+- ✅ **Imutável:** Você NÃO pode adicionar, remover ou modificar elementos
+- ✅ **Ordem preservada:** Mantém a ordem exatamente como você especificou
+- ✅ **Performática:** Usa uma implementação otimizada internamente
+- ✅ **Null-safe (parcial):** Permite null em alguns casos, mas depende da implementação
+
+**O Problema: Tentar Modificar**
+
+```java
+// ❌ ERRO: List.of() cria imutável
+List<String> nomes = List.of("Alice", "Bob");
+
+nomes.add("Charlie");      // ❌ UnsupportedOperationException
+nomes.remove(0);           // ❌ UnsupportedOperationException
+nomes.set(0, "David");     // ❌ UnsupportedOperationException
+
+// ✅ CORRETO: Usar ArrayList para modificável
+List<String> mutavel = new ArrayList<>(List.of("Alice", "Bob"));
+mutavel.add("Charlie");    // ✅ Funciona
+System.out.println(mutavel);  // [Alice, Bob, Charlie]
+```
+
+**Quando Usar Cada Uma:**
+
+| Situação                      | Use                         | Exemplo                                          |
+| ----------------------------- | --------------------------- | ------------------------------------------------ |
+| **Valores fixos, constantes** | `List.of()`                 | `List.of(1, 2, 3, 4, 5)`                         |
+| **Precisa adicionar/remover** | `new ArrayList<>()`         | `List<String> tags = new ArrayList<>()`          |
+| **Conversão de array**        | `Arrays.asList()`           | `List<String> list = Arrays.asList(array)`       |
+| **Cópia de outra lista**      | `new ArrayList<>(original)` | `List<String> copia = new ArrayList<>(original)` |
+
+### 2.6 Modifiable vs Unmodifiable Lists — A Diferença Crítica
+
+```java
+// ❌ ERRO COMUM: Confundir Collections.unmodifiableList()
+List<Integer> original = new ArrayList<>(List.of(1, 2, 3));
+List<Integer> view = Collections.unmodifiableList(original);
+
+// view é apenas uma VISUALIZAÇÃO (wrapper) do original
+original.add(4);
+System.out.println(view);  // [1, 2, 3, 4] — mudou!
+
+// Tentar modificar view lança exceção
+view.add(5);  // ❌ UnsupportedOperationException
+
+// ✅ CORRETO: List.of() cria cópia verdadeira
+List<Integer> copia = List.of(1, 2, 3);
+original.add(4);
+System.out.println(copia);  // [1, 2, 3] — não mudou!
+```
+
+**Regra de Ouro:**
+
+- `List.of()` = **Cópia independente e imutável** ✅
+- `Collections.unmodifiableList()` = **Visualização wrapper** (mudanças no original refletem) ⚠️
+
 ---
 
 ## 🚀 Capítulo 3: ArrayList — A Implementação Padrão
@@ -710,20 +782,133 @@ emOrdem.add("C");
 System.out.println(emOrdem);  // [Java, Python, C]
 ```
 
-### 9.2 Operações em Set
+### 9.1.5 Set.of() — Criando Unmodifiable Sets (Java 9+)
+
+A partir do Java 9, você pode usar `Set.of()` para criar **Sets imutáveis** rapidamente:
+
+```java
+// ✅ Criando Sets imutáveis com Set.of()
+Set<Integer> ints = Set.of(1, 2, 3);
+Set<String> strings = Set.of("alpha", "beta", "gamma");
+Set<Object> mixed = Set.of(1, false, "foo");
+
+System.out.println(ints);  // [1, 2, 3] (ordem não garantida)
+System.out.println(strings.size());  // 3
+```
+
+**Características de Sets criados com `Set.of()`:**
+
+- ✅ **Imutável:** Você NÃO pode adicionar, remover ou modificar elementos
+- ✅ **Sem duplicatas:** Se tentar `Set.of(1, 1, 2)` lança `IllegalArgumentException`
+- ✅ **Performático:** Usa uma implementação otimizada internamente
+- ✅ **Null-safe:** Não permite null
+
+**O Problema: Tentar Modificar**
+
+```java
+// ❌ ERRO: Set.of() cria imutável
+Set<Integer> numeros = Set.of(1, 2, 3);
+
+numeros.add(4);      // ❌ UnsupportedOperationException
+numeros.remove(1);   // ❌ UnsupportedOperationException
+numeros.clear();     // ❌ UnsupportedOperationException
+
+// ✅ CORRETO: Usar HashSet para modificável
+Set<Integer> mutavel = new HashSet<>(Set.of(1, 2, 3));
+mutavel.add(4);      // ✅ Funciona
+System.out.println(mutavel);  // [1, 2, 3, 4]
+```
+
+**Quando Usar Cada Uma:**
+
+| Situação                      | Use                     | Exemplo                                     |
+| ----------------------------- | ----------------------- | ------------------------------------------- |
+| **Valores fixos, constantes** | `Set.of()`              | `Set.of("RED", "GREEN", "BLUE")`            |
+| **Precisa adicionar/remover** | `new HashSet<>()`       | `Set<String> tags = new HashSet<>()`        |
+| **Precisa de ordenação**      | `new TreeSet<>()`       | `Set<String> ordenado = new TreeSet<>()`    |
+| **Manter ordem de inserção**  | `new LinkedHashSet<>()` | `Set<String> ordem = new LinkedHashSet<>()` |
+
+### 9.1.6 Modifiable vs Unmodifiable Sets — A Diferença Crítica
+
+```java
+// ❌ ERRO COMUM: Confundir Collections.unmodifiableSet()
+Set<Integer> original = new HashSet<>(Set.of(1, 2, 3));
+Set<Integer> view = Collections.unmodifiableSet(original);
+
+// view é apenas uma VISUALIZAÇÃO (wrapper) do original
+original.add(4);
+System.out.println(view);  // [1, 2, 3, 4] — mudou!
+
+// Tentar modificar view lança exceção
+view.add(5);  // ❌ UnsupportedOperationException
+
+// ✅ CORRETO: Set.of() cria cópia verdadeira
+Set<Integer> copia = Set.of(1, 2, 3);
+original.add(4);
+System.out.println(copia);  // [1, 2, 3] — não mudou!
+```
+
+**Regra de Ouro:**
+
+- `Set.of()` = **Cópia independente e imutável** ✅
+- `Collections.unmodifiableSet()` = **Visualização wrapper** (mudanças no original refletem) ⚠️
+
+### 9.2 Operações em Set — Retorno Boolean
+
+Uma característica importante da interface `Set` é que métodos como `add()` e `remove()` **retornam um boolean** indicando se a operação foi bem-sucedida:
+
+```java
+Set<Integer> set = new HashSet<>();
+
+// add() retorna true se adicionou, false se já existia
+boolean resultado1 = set.add(1);     // true (adicionou)
+boolean resultado2 = set.add(2);     // true (adicionou)
+boolean resultado3 = set.add(1);     // false (já existia)
+
+System.out.println(set.size());      // 2
+System.out.println(set);              // [1, 2] (ordem não garantida)
+
+// remove() retorna true se removeu, false se não existia
+boolean removeuExistente = set.remove(1);   // true (removeu)
+boolean naoExistia = set.remove(999);       // false (não existia)
+
+System.out.println(set.size());      // 1
+
+// contains() verifica presença
+System.out.println(set.contains(2));  // true
+System.out.println(set.contains(1));  // false (foi removido)
+```
+
+**Por Que Retorna Boolean?**
+
+Diferente de `List` que retorna `void`, `Set` precisa comunicar:
+
+- Se o elemento **já existia** (add retorna false)
+- Se o elemento **foi encontrado** (remove retorna true)
+
+Essa informação é crucial para validar se a operação teve efeito:
+
+```java
+// ✅ Usando o retorno para validar
+Set<String> usuarios = new HashSet<>();
+
+if (usuarios.add("alice")) {
+    System.out.println("Novo usuário adicionado");
+} else {
+    System.out.println("Usuário já existia");
+}
+
+if (usuarios.remove("bob")) {
+    System.out.println("Usuário removido");
+} else {
+    System.out.println("Usuário não encontrado");
+}
+```
+
+### 9.3 Operações Matemáticas em Sets
 
 ```java
 Set<String> conjunto = new HashSet<>(List.of("A", "B", "C"));
-
-// add
-boolean adicionado = conjunto.add("D");  // true
-boolean naoAdicionado = conjunto.add("A");  // false (já existe)
-
-// remove
-boolean removido = conjunto.remove("B");  // true
-
-// contains
-boolean tem = conjunto.contains("C");  // true
 
 // Operações de conjunto (matemática)
 Set<Integer> A = new HashSet<>(List.of(1, 2, 3));
@@ -742,7 +927,7 @@ Set<Integer> diferenca = new HashSet<>(A);
 diferenca.removeAll(B);  // {1}
 ```
 
-### 9.3 Remover Duplicatas de Uma Lista
+### 9.4 Remover Duplicatas de Uma Lista
 
 ```java
 List<String> comDuplas = List.of("A", "B", "A", "C", "B", "D");
