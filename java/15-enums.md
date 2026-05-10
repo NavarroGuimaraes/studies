@@ -1016,14 +1016,14 @@ void process(Status status) {
 Status.process(999);  // ❌ Erro de compilação!
 ```
 
-| Aspecto | Integer Constants | Enum |
-|---------|------------------|------|
-| **Type-safety** | ❌ Não | ✅ Sim |
-| **Compilação** | ❌ Erro em runtime | ✅ Erro em compile-time |
-| **toString()** | "0", "1", "2" | "PENDING", "APPROVED" |
-| **Iteração** | ❌ Difícil | ✅ values() |
-| **Switch** | ⚠️ Sem exhaustão | ✅ Compiler avisa |
-| **Performance** | Mais rápido | Mais lento (negligenciável) |
+| Aspecto         | Integer Constants  | Enum                        |
+| --------------- | ------------------ | --------------------------- |
+| **Type-safety** | ❌ Não             | ✅ Sim                      |
+| **Compilação**  | ❌ Erro em runtime | ✅ Erro em compile-time     |
+| **toString()**  | "0", "1", "2"      | "PENDING", "APPROVED"       |
+| **Iteração**    | ❌ Difícil         | ✅ values()                 |
+| **Switch**      | ⚠️ Sem exhaustão   | ✅ Compiler avisa           |
+| **Performance** | Mais rápido        | Mais lento (negligenciável) |
 
 ### 11.2 Enums vs String Constants
 
@@ -1141,8 +1141,8 @@ public enum RecommendationStrategy {
 }
 
 // Usar
-RecommendationStrategy strategy = user.isBetaUser() ? 
-    RecommendationStrategy.TRENDING : 
+RecommendationStrategy strategy = user.isBetaUser() ?
+    RecommendationStrategy.TRENDING :
     RecommendationStrategy.POPULAR;
 List<Video> recommended = strategy.recommend(user);
 ```
@@ -1403,12 +1403,14 @@ Set<Permission> permissions = EnumSet.of(Permission.READ, Permission.WRITE);
 ### 1. Quando usar Enum vs Constants?
 
 **Use Enum quando:**
+
 - Valores são fixos e conhecidos em compile-time
 - Type-safety é importante
 - Valores são relacionados (days, colors, status)
 - Você quer usar em switch
 
 **Use Constants quando:**
+
 - Valores são dinâmicos
 - Precisa de muitos valores
 - Type-safety não é crítica
